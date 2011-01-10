@@ -4,7 +4,9 @@ import gnu.io.SerialPort;
 import org.jboss.netty.channel.DefaultChannelConfig;
 import org.jboss.netty.util.internal.ConversionUtil;
 
-
+/**
+ * TODO listen to change events and adapt channel to this
+ */
 public class RXTXChannelConfig extends DefaultChannelConfig {
 
 	public static enum Stopbits {

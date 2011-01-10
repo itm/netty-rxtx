@@ -178,6 +178,8 @@ public class RXTXChannel implements Channel {
 					channel.channelConfig.getStopbits().getValue(),
 					channel.channelConfig.getParitybit().getValue()
 			);
+
+			// TODO do this more generic
 			channel.serialPort.setDTR(false);
 			channel.serialPort.setRTS(false);
 
@@ -259,7 +261,7 @@ public class RXTXChannel implements Channel {
 		}
 
 		public void serialEvent(final SerialPortEvent event) {
-			log.debug("{}", event);
+			log.trace("{}", event);
 			switch (event.getEventType()) {
 				case SerialPortEvent.DATA_AVAILABLE:
 					try {
