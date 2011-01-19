@@ -20,14 +20,14 @@ public class RXTXChannelFactory implements ChannelFactory {
 		this.executor = executor;
 	}
 
-	@Override
 	public Channel newChannel(final ChannelPipeline pipeline) {
-		RXTXChannel channel = new RXTXChannel(executor, pipeline, this);
+		RXTXChannelSink sink = new RXTXChannelSink(executor);
+		RXTXChannel channel = new RXTXChannel(null, this, pipeline, sink);
+		sink.setChannel(channel);
 		channels.add(channel);
 		return channel;
 	}
 
-	@Override
 	public void releaseExternalResources() {
 		ChannelGroupFuture close = channels.close();
 		close.awaitUninterruptibly();

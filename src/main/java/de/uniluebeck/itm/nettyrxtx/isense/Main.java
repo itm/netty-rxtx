@@ -1,19 +1,20 @@
-package de.uniluebeck.itm.nettyrxtx;
+package de.uniluebeck.itm.nettyrxtx.isense;
 
 
+import de.uniluebeck.itm.nettyrxtx.RXTXChannelFactory;
+import de.uniluebeck.itm.nettyrxtx.RXTXDeviceAddress;
+import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoder;
+import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingEncoder;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ReadOnlyChannelBuffer;
 import org.jboss.netty.channel.*;
-import org.jboss.netty.handler.logging.LoggingHandler;
-import org.jboss.netty.logging.InternalLogLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 
@@ -31,14 +32,22 @@ public class Main {
 		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 			public ChannelPipeline getPipeline() throws Exception {
 				DefaultChannelPipeline pipeline = new DefaultChannelPipeline();
+
+				pipeline.addLast("framingDecoder", new DleStxEtxFramingDecoder());
+				pipeline.addLast("iSenseDecoder", new ISenseDecoder());
+
 				pipeline.addLast("loggingHandler", new SimpleChannelHandler() {
 					@Override
 					public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e)
 							throws Exception {
-						log.debug("{}", Arrays.toString(((ChannelBuffer) e.getMessage()).array()));
-						super.messageReceived(ctx, e);
+						ISensePacket packet = (ISensePacket) e.getMessage();
+						log.info("{}", packet);
 					}
 				});
+
+				pipeline.addLast("iSenseEncoder", new ISenseEncoder());
+				pipeline.addLast("framingEncoder", new DleStxEtxFramingEncoder());
+
 				return pipeline;
 			}
 		});
