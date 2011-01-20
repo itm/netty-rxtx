@@ -1,21 +1,23 @@
-package de.uniluebeck.itm.nettyrxtx.isense;
+package de.uniluebeck.itm.nettyrxtx.rup;
 
 
 import de.uniluebeck.itm.nettyrxtx.RXTXChannelFactory;
 import de.uniluebeck.itm.nettyrxtx.RXTXDeviceAddress;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoder;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingEncoder;
+import de.uniluebeck.itm.nettyrxtx.isense.ISenseDecoder;
+import de.uniluebeck.itm.nettyrxtx.isense.ISenseEncoder;
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ReadOnlyChannelBuffer;
 import org.jboss.netty.channel.*;
+import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,20 +37,24 @@ public class Main {
 			public ChannelPipeline getPipeline() throws Exception {
 				DefaultChannelPipeline pipeline = new DefaultChannelPipeline();
 
-				pipeline.addLast("framingDecoder", new DleStxEtxFramingDecoder());
-				pipeline.addLast("iSenseDecoder", new ISenseDecoder());
+				pipeline.addLast("FramingDecoder", new DleStxEtxFramingDecoder());
+				pipeline.addLast("ISenseDecoder", new ISenseDecoder());
+				pipeline.addLast("RUPPacketDecoder", new RUPPacketDecoder());
+				pipeline.addLast("RUPPayloadExtractor", new RUPPayloadExtractor());
+				pipeline.addLast("RUPPayloadFramingDecoder", new DleStxEtxFramingDecoder());
+				pipeline.addLast("StringDecoder", new StringDecoder(CharsetUtil.UTF_8));
 
-				pipeline.addLast("loggingHandler", new SimpleChannelHandler() {
+				pipeline.addLast("LoggingHandler", new SimpleChannelHandler() {
 					@Override
 					public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e)
 							throws Exception {
-						ISensePacket packet = (ISensePacket) e.getMessage();
-						log.info("{}", packet);
+						log.info("{}", e.getMessage());
 					}
 				});
 
-				pipeline.addLast("iSenseEncoder", new ISenseEncoder());
-				pipeline.addLast("framingEncoder", new DleStxEtxFramingEncoder());
+				pipeline.addLast("RUPPacketEncoder", new RUPPacketEncoder());
+				pipeline.addLast("ISenseEncoder", new ISenseEncoder());
+				pipeline.addLast("FramingEncoder", new DleStxEtxFramingEncoder());
 
 				return pipeline;
 			}

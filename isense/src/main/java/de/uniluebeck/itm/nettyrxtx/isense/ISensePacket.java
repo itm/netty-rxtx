@@ -35,7 +35,6 @@ public class ISensePacket {
 
 	@Override
 	public String toString() {
-		ByteBuffer bb = payload.toByteBuffer();
 		ISensePacketType packetType = ISensePacketType.fromValue(type);
 		StringBuilder builder = new StringBuilder();
 		builder.append("ISensePacket[type=");
@@ -45,9 +44,10 @@ public class ISensePacket {
 			ReadOnlyChannelBuffer buffer = getPayload();
 			byte[] payloadBuffer = new byte[buffer.readableBytes()];
 			buffer.readBytes(payloadBuffer);
-			builder.append(new String(payloadBuffer));
+			String s = new String(payloadBuffer);
+			builder.append(s.endsWith("\n") ? s.substring(0, s.length()-2) : s);
 		} else {
-			builder.append(StringUtils.toHexString(bb));
+			builder.append(StringUtils.toHexString(payload));
 		}
 		builder.append("]");
 		return builder.toString();

@@ -38,16 +38,20 @@ public class DleStxEtxFramingDecoder extends FrameDecoder {
 
 				if (c == DleStxEtxConstants.STX && !foundPacket) {
 
-					log.trace("STX received in DLE mode");
+					//log.trace("STX received in DLE mode");
 					foundPacket = true;
 
 				} else if (c == DleStxEtxConstants.ETX && foundPacket) {
 
 					// packet was completely received
 					if (log.isTraceEnabled()) {
-						log.trace("Packet decoding completed: {}", StringUtils.toHexString(packet.array(),
-								packet.readerIndex(), packet.readableBytes()
+						log.trace("[{}] Packet decoding completed: {}", new Object[]{
+								ctx.getName(), StringUtils.toHexString(
+								packet.array(),
+								packet.readerIndex(),
+								packet.readableBytes()
 						)
+						}
 						);
 					}
 					ChannelBuffer packetRead = packet;
@@ -57,7 +61,7 @@ public class DleStxEtxFramingDecoder extends FrameDecoder {
 				} else if (c == DleStxEtxConstants.DLE && foundPacket) {
 
 					// Stuffed DLE found
-					log.trace("Stuffed DLE received in DLE mode");
+					//log.trace("Stuffed DLE received in DLE mode");
 					packet.writeByte(DleStxEtxConstants.DLE);
 
 				} else {
@@ -73,7 +77,7 @@ public class DleStxEtxFramingDecoder extends FrameDecoder {
 			} else {
 
 				if (c == DleStxEtxConstants.DLE) {
-					log.trace("Plain DLE received");
+					//log.trace("Plain DLE received");
 					foundDLE = true;
 				} else if (foundPacket) {
 					packet.writeByte(c);

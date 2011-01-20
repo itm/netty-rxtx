@@ -77,8 +77,19 @@ public class RXTXChannelSink extends AbstractChannelSink {
 				throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException, IOException,
 				TooManyListenersException {
 
-			CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(channelSink.remoteAddress.getDeviceAddress());
-			CommPort commPort = cpi.open(this.getClass().getName(), 1000);
+			final CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(channelSink.remoteAddress.getDeviceAddress());
+			final CommPort commPort = cpi.open(this.getClass().getName(), 1000);
+
+			Runtime.getRuntime().addShutdownHook(new Thread(){
+				@Override
+				public void run() {
+					try {
+						commPort.close();
+					} catch (Exception e) {
+						log.warn("" + e, e);
+					}
+				}
+			});
 
 			channelSink.serialPort = ((SerialPort) commPort);
 			log.debug("Adding SerialPortEventListener");
@@ -118,7 +129,7 @@ public class RXTXChannelSink extends AbstractChannelSink {
 				try {
 					disconnectInternal();
 					log.debug("Successfully disconnected");
-					channelFuture.setSuccess();
+					channelSink.channel.doSetClosed();
 				} catch (Exception e) {
 					log.warn("" + e, e);
 					channelFuture.setFailure(e);

@@ -17,39 +17,37 @@ public class RXTXChannel extends AbstractChannel {
 	}
 
 	public ChannelConfig getConfig() {
-		log.trace("RXTXChannel.getConfig()");
 		return ((RXTXChannelSink) getPipeline().getSink()).getConfig();
 	}
 
 	public boolean isBound() {
-		log.trace("RXTXChannel.isBound()");
 		return ((RXTXChannelSink) getPipeline().getSink()).isBound();
 	}
 
 	public boolean isConnected() {
-		log.trace("RXTXChannel.isConnected()");
 		return ((RXTXChannelSink) getPipeline().getSink()).isConnected();
 	}
 
 	public SocketAddress getLocalAddress() {
-		log.trace("RXTXChannel.getLocalAddress()");
 		throw new UnsupportedOperationException();
 	}
 
 	public SocketAddress getRemoteAddress() {
-		log.trace("RXTXChannel.getRemoteAddress()");
 		return ((RXTXChannelSink) getPipeline().getSink()).getRemoteAddress();
 	}
 
 	@Override
 	public ChannelFuture bind(final SocketAddress localAddress) {
-		log.trace("RXTXChannel.bind({})", localAddress);
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ChannelFuture unbind() {
-		log.trace("RXTXChannel.unbind()");
 		throw new UnsupportedOperationException();
 	}
+
+	void doSetClosed() {
+		setClosed();
+	}
+
 }

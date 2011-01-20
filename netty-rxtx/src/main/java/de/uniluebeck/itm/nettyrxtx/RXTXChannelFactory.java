@@ -7,16 +7,18 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.util.internal.ExecutorUtil;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 public class RXTXChannelFactory implements ChannelFactory {
 
 	private final ChannelGroup channels = new DefaultChannelGroup("RXTXChannelFactory-ChannelGroup");
 
-	private Executor executor;
+	private ExecutorService executor;
 
-	public RXTXChannelFactory(Executor executor) {
+	public RXTXChannelFactory(ExecutorService executor) {
 		this.executor = executor;
 	}
 
@@ -31,5 +33,6 @@ public class RXTXChannelFactory implements ChannelFactory {
 	public void releaseExternalResources() {
 		ChannelGroupFuture close = channels.close();
 		close.awaitUninterruptibly();
+		ExecutorUtil.terminate(executor);
 	}
 }
