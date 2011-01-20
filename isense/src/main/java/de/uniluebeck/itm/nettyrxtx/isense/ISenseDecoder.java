@@ -17,7 +17,7 @@ public class ISenseDecoder extends OneToOneDecoder {
 
 		ChannelBuffer buffer = (ChannelBuffer) msg;
 		ISensePacket iSensePacket = new ISensePacket(buffer.readByte(), buffer.slice());
-		log.trace("Decoded ISensePacket: {}", iSensePacket);
+		log.trace("[{}] Decoded ISensePacket: {}", ctx.getName(), iSensePacket);
 		return iSensePacket;
 	}
 }

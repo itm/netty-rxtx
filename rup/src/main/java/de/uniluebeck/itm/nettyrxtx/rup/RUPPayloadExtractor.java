@@ -12,7 +12,7 @@ public class RUPPayloadExtractor extends SimpleChannelUpstreamHandler {
 	@Override
 	public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
 		RUPPacket rupPacket = (RUPPacket) e.getMessage();
-		log.trace("Extracted payload");
+		log.trace("[{}] Extracted payload", ctx.getName());
 		ctx.sendUpstream(
 				new UpstreamMessageEvent(ctx.getChannel(), rupPacket.getPayload(), ctx.getChannel().getRemoteAddress())
 		);

@@ -21,7 +21,7 @@ public class RUPPacketDecoder extends SimpleChannelHandler {
 
 		private Map<Byte, RUPPacket> packets = Maps.newTreeMap();
 
-		private int windowSize = 100;
+		private int windowSize = 10;
 
 		private int windowOffset = 0;
 
@@ -83,7 +83,8 @@ public class RUPPacketDecoder extends SimpleChannelHandler {
 
 			if (log.isTraceEnabled()) {
 				log.trace(
-						"Received packet with sequenceNumber in window ({} -> {}): {}", new Object[]{
+						"[{}] Received packet with sequenceNumber in window ({} -> {}): {}", new Object[]{
+								ctx.getName(),
 								packetBuffer.windowOffset,
 								((packetBuffer.windowOffset + packetBuffer.windowSize) % 255),
 								rupPacket
@@ -99,7 +100,8 @@ public class RUPPacketDecoder extends SimpleChannelHandler {
 		// discard packets outside window bounds
 		else {
 			if (log.isTraceEnabled()) {
-				log.trace("Ignored packet outside of packetBuffer window ({} -> {}): {}", new Object[]{
+				log.trace("[{}] Ignored packet outside of packetBuffer window ({} -> {}): {}", new Object[]{
+						ctx.getName(),
 						packetBuffer.windowOffset,
 						((packetBuffer.windowOffset + packetBuffer.windowSize) % 255),
 						rupPacket
@@ -121,7 +123,7 @@ public class RUPPacketDecoder extends SimpleChannelHandler {
 
 			// send packet upstream
 			if (log.isTraceEnabled()) {
-				log.trace("Sending packet upstream: {}", rupPacket);
+				log.trace("[{}] Sending packet upstream: {}", ctx.getName(), rupPacket);
 			}
 			ctx.sendUpstream(
 					new UpstreamMessageEvent(ctx.getChannel(), rupPacket,
