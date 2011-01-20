@@ -21,7 +21,7 @@ public class DleStxEtxFramingDecoderTest {
 				DleStxEtxConstants.DLE_ETX
 		);
 
-		testInternal(encodedBuffer, payload);
+		testDecoding(encodedBuffer, payload);
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class DleStxEtxFramingDecoderTest {
 				DleStxEtxConstants.DLE_ETX
 		);
 
-		testInternal(encodedBuffer, expectedPayload);
+		testDecoding(encodedBuffer, expectedPayload);
 	}
 
 	@Test
@@ -53,7 +53,7 @@ public class DleStxEtxFramingDecoderTest {
 				"klasjd".getBytes()
 		);
 
-		testInternal(encodedBuffer, expectedPayload);
+		testDecoding(encodedBuffer, expectedPayload);
 	}
 
 	@Test
@@ -70,10 +70,10 @@ public class DleStxEtxFramingDecoderTest {
 				"klasjd".getBytes()
 		);
 
-		testInternal(encodedBuffer, expectedPayload);
+		testDecoding(encodedBuffer, expectedPayload);
 	}
 
-	private void testInternal(ChannelBuffer encodedBuffer, byte[] expectedPayload) {
+	private void testDecoding(ChannelBuffer encodedBuffer, byte[] expectedPayload) {
 		DecoderEmbedder<ChannelBuffer> decoder = new DecoderEmbedder<ChannelBuffer>(new DleStxEtxFramingDecoder());
 		decoder.offer(encodedBuffer);
 		ChannelBuffer decodedBuffer = decoder.poll();
