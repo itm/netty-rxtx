@@ -5,9 +5,9 @@ import org.jboss.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RUPPayloadExtractor extends SimpleChannelUpstreamHandler {
+public class RUPPacketPayloadExtractor extends SimpleChannelUpstreamHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(RUPPayloadExtractor.class);
+	private static final Logger log = LoggerFactory.getLogger(RUPPacketPayloadExtractor.class);
 
 	@Override
 	public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {

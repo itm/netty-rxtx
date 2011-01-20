@@ -6,8 +6,6 @@ import de.uniluebeck.itm.nettyrxtx.RXTXDeviceAddress;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoder;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingEncoder;
 import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ReadOnlyChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,7 +33,7 @@ public class Main {
 				DefaultChannelPipeline pipeline = new DefaultChannelPipeline();
 
 				pipeline.addLast("framingDecoder", new DleStxEtxFramingDecoder());
-				pipeline.addLast("iSenseDecoder", new ISenseDecoder());
+				pipeline.addLast("iSenseDecoder", new ISensePacketDecoder());
 
 				pipeline.addLast("loggingHandler", new SimpleChannelHandler() {
 					@Override
@@ -47,7 +44,7 @@ public class Main {
 					}
 				});
 
-				pipeline.addLast("iSenseEncoder", new ISenseEncoder());
+				pipeline.addLast("iSenseEncoder", new ISensePacketEncoder());
 				pipeline.addLast("framingEncoder", new DleStxEtxFramingEncoder());
 
 				return pipeline;

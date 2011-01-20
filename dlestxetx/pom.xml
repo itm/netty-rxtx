@@ -6,11 +6,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>de.uniluebeck.itm.netty-rxtx</groupId>
-        <artifactId>parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <relativePath>../</relativePath>
-    </parent>
+		<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../</relativePath>
+	</parent>
 
 	<artifactId>dlestxetx</artifactId>
 	<name>Netty RXTX :: DLESTXETX Framing Decoder/Encoder</name>
@@ -20,6 +20,11 @@
 		<dependency>
 			<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
 			<artifactId>netty-rxtx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

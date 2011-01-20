@@ -86,4 +86,8 @@ public enum ISensePacketType {
 	public static ISensePacketType fromValue(byte value) {
 		return typesMap.get(value);
 	}
+
+	public byte getValue() {
+		return value;
+	}
 }

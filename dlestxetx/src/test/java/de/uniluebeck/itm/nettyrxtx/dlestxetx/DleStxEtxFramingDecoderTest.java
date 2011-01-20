@@ -1,3 +1,5 @@
+package de.uniluebeck.itm.nettyrxtx.dlestxetx;
+
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxConstants;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoder;
 import org.jboss.netty.buffer.ChannelBuffer;

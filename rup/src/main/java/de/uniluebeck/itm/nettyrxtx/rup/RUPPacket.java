@@ -23,8 +23,6 @@
 
 package de.uniluebeck.itm.nettyrxtx.rup;
 
-import com.google.common.base.Preconditions;
-import de.uniluebeck.itm.nettyrxtx.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
@@ -37,7 +35,7 @@ public interface RUPPacket {
 	 *
 	 * @return the packets type
 	 */
-	RUPPacketType getCmdType();
+	byte getCmdType();
 
 	/**
 	 * Returns the packets sequence number.
