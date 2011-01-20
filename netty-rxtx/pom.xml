@@ -6,11 +6,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>de.uniluebeck.itm.netty-rxtx</groupId>
-        <artifactId>parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
-        <relativePath>../</relativePath>
-    </parent>
+		<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../</relativePath>
+	</parent>
 
 	<artifactId>netty-rxtx</artifactId>
 	<name>Netty RXTX :: Netty RXTX</name>
@@ -32,6 +32,11 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

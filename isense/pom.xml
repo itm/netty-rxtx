@@ -21,6 +21,11 @@
 			<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
 			<artifactId>dlestxetx</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>
