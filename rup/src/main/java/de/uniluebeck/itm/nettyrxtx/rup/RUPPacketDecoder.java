@@ -1,142 +1,138 @@
 package de.uniluebeck.itm.nettyrxtx.rup;
 
-
 import com.google.common.collect.Maps;
-import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.channel.UpstreamMessageEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.uniluebeck.itm.nettyrxtx.ChannelUpstreamHandlerFactory;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.*;
+import org.jboss.netty.handler.codec.embedder.DecoderEmbedder;
 
 import java.util.Map;
 
-public class RUPPacketDecoder extends SimpleChannelHandler {
+/**
+ * Decoder that decodes a series of RUPPacketFragment instances (fragments) into one {@link RUPPacketFragment} by
+ * applying another decoder (e.g {@link de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoder} on the packets
+ * payload. The result of the decoding is on {@link RUPPacketFragment} instance with a reassembled payload and the same
+ * packet headers as the individual fragments (except of the sequenceNumber field).
+ */
+public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(RUPPacketDecoder.class);
+	private static class Reassembler {
 
-	private static class PacketBuffer {
+		private final DecoderEmbedder<ChannelBuffer> decoder;
 
-		private Map<Byte, RUPPacket> packets = Maps.newTreeMap();
+		private final long source;
 
-		private int windowSize = 10;
+		private final long destination;
 
-		private int windowOffset = 0;
+		public Reassembler(final long source, final long destination,
+						   final ChannelUpstreamHandler[] channelUpstreamHandlers) {
+			this.source = source;
+			this.destination = destination;
+			this.decoder = new DecoderEmbedder<ChannelBuffer>(channelUpstreamHandlers);
+		}
 
-		public boolean veryFirstPacket = true;
+		public RUPPacket[] receiveFragment(final RUPPacket fragmentedRupPacketFragment) {
 
-		/**
-		 * Checks if a sequenceNumber is inside the acceptance window.
-		 *
-		 * @param sequenceNumber the sequenceNumber of the packet received
-		 *
-		 * @return {@code true} if sequenceNumber lies inside the window, {@code false} otherwise
-		 */
-		private boolean isInWindow(int sequenceNumber) {
+			// let the decoder try to reassemble the package
+			decoder.offer(fragmentedRupPacketFragment);
 
-			// if window overlaps number overflow at 255 check if sequenceNumber either lies in between windowOffset and 255
-			// or in between zero and ((windowOffset+windowSize)%255)
-			if (windowOffset + windowSize > 255) {
+			// check if one or more packages have been reassembled
+			Object[] decodedPayloads = decoder.pollAll();
+			RUPPacket[] decodedRUPPackets = new RUPPacket[decodedPayloads.length];
 
-				return sequenceNumber > windowOffset || (sequenceNumber > 0 && sequenceNumber < ((windowOffset + windowSize) % 255));
+			// return all reassembled packages
+			for (int i = 0; i < decodedPayloads.length; i++) {
+
+				ChannelBuffer decodedPayloadBuffer = (ChannelBuffer) decodedPayloads[i];
+				decodedRUPPackets[i] = new RUPPacketImpl(
+						RUPPacket.Type.MESSAGE,
+						destination,
+						source,
+						decodedPayloadBuffer
+				);
 			}
 
-			// check if sequenceNumber lies in between the non-overlapping window
-			return sequenceNumber >= windowOffset && sequenceNumber < (windowOffset + windowSize);
+			return decodedRUPPackets;
 		}
 	}
 
-	private Map<Long, PacketBuffer> packetBuffers = Maps.newHashMap();
+	/**
+	 * A set of factories that are called to create ChannelUpstreamHandler instances upon creation of a new Reassembler
+	 * instance.
+	 */
+	private final Tuple<ChannelUpstreamHandlerFactory, Object>[] channelUpstreamHandlerFactories;
+
+	/**
+	 * Map that holds a Reassembler instance for every source address of RUPPacketFragment instances received.
+	 */
+	private final Map<Long, Reassembler> reassemblersMap = Maps.newHashMap();
+
+	/**
+	 * Constructs a new RUPPacketDecoder instance that uses a {@link DecoderEmbedder} that wraps decoders created by the
+	 * {@code channelUpstreamHandlerFactories} to reassemble a RUPPacketFragment (type {@link RUPPacket.Type#MESSAGE})
+	 * instance from a series of RUPPacketFragment fragments. For each RUP endpoint one {@link DecoderEmbedder} instance
+	 * that uses the decoders created by {@code channelUpstreamHandlers}.
+	 *
+	 * @param channelUpstreamHandlerFactories
+	 *         the factories for creating handlers for reassembling the packet from a series of packet fragments
+	 */
+	public RUPPacketDecoder(final Tuple<ChannelUpstreamHandlerFactory, Object>... channelUpstreamHandlerFactories) {
+		this.channelUpstreamHandlerFactories = channelUpstreamHandlerFactories;
+	}
 
 	@Override
 	public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
 
-		final ISensePacket iSensePacket = (ISensePacket) e.getMessage();
+		RUPPacket fragmentedRupPacketFragment = (RUPPacket) e.getMessage();
 
-		// only do something if the packet is a Remote UART packet, otherwise send it upstream
-		if (!RUPPacketHelper.isRemoteUARTPacket(iSensePacket)) {
+		// only reassembly RUP message packets, other types don't need reassembly
+		if (RUPPacket.Type.MESSAGE.getValue() != fragmentedRupPacketFragment.getCmdType()) {
 			ctx.sendUpstream(e);
 			return;
 		}
 
-		final RUPPacket rupPacket = RUPPacketFactory.wrap(iSensePacket.getPayload());
+		Reassembler reassembler = getReassembler(fragmentedRupPacketFragment);
+		RUPPacket[] reassembledPackets = reassembler.receiveFragment(fragmentedRupPacketFragment);
 
-		final byte sequenceNumber = rupPacket.getSequenceNumber();
-		final long source = rupPacket.getSource();
-
-		// get the packetBuffer for the sender of rupPacket
-		PacketBuffer packetBuffer = packetBuffers.get(source);
-		if (packetBuffer == null) {
-			packetBuffer = new PacketBuffer();
-			packetBuffers.put(source, packetBuffer);
-		}
-
-		if (packetBuffer.veryFirstPacket) {
-			packetBuffer.veryFirstPacket = false;
-			packetBuffer.windowOffset = sequenceNumber;
-		}
-
-		// only accept packets that are within window bounds
-		if (packetBuffer.isInWindow(sequenceNumber)) {
-
-			if (log.isTraceEnabled()) {
-				log.trace(
-						"[{}] Received packet with sequenceNumber in window ({} -> {}): {}", new Object[]{
-								ctx.getName(),
-								packetBuffer.windowOffset,
-								((packetBuffer.windowOffset + packetBuffer.windowSize) % 255),
-								rupPacket
-						}
-				);
-			}
-
-			packetBuffer.packets.put(sequenceNumber, rupPacket);
-			sendUpstreamIfBuffered(packetBuffer, ctx);
-
-		}
-
-		// discard packets outside window bounds
-		else {
-			if (log.isTraceEnabled()) {
-				log.trace("[{}] Ignored packet outside of packetBuffer window ({} -> {}): {}", new Object[]{
-						ctx.getName(),
-						packetBuffer.windowOffset,
-						((packetBuffer.windowOffset + packetBuffer.windowSize) % 255),
-						rupPacket
-				}
-				);
-			}
+		for (RUPPacket reassembledPacket : reassembledPackets) {
+			Channels.fireMessageReceived(ctx, reassembledPacket);
 		}
 
 	}
 
-	private void sendUpstreamIfBuffered(final PacketBuffer packetBuffer, final ChannelHandlerContext ctx) {
+	/**
+	 * Returns or constructs the Reassembler responsible for packets from the source node of {@code fragmentedRupPacket}.
+	 *
+	 * @param fragmentedRupPacketFragment the packet for which to get the reassembler
+	 *
+	 * @return the responsible Reassembler instance
+	 */
+	private Reassembler getReassembler(final RUPPacket fragmentedRupPacketFragment) {
 
-		// if there's no packet at currents offset it might mean we should possibly wait for it to arrive before sending
-		// packages upstream
-		Byte currentOffset = (byte) (0xFF & packetBuffer.windowOffset);
-		while (packetBuffer.packets.containsKey(currentOffset)) {
+		long source = fragmentedRupPacketFragment.getSource();
+		long destination = fragmentedRupPacketFragment.getDestination();
+		Reassembler reassembler = reassemblersMap.get(source);
 
-			RUPPacket rupPacket = packetBuffer.packets.remove(currentOffset);
-
-			// send packet upstream
-			if (log.isTraceEnabled()) {
-				log.trace("[{}] Sending packet upstream: {}", ctx.getName(), rupPacket);
-			}
-			ctx.sendUpstream(
-					new UpstreamMessageEvent(ctx.getChannel(), rupPacket,
-							ctx.getChannel().getRemoteAddress()
-					)
-			);
-
-
-			// move windowOffset
-			packetBuffer.windowOffset = (++packetBuffer.windowOffset) % 255;
-			currentOffset = (byte) (0xFF & packetBuffer.windowOffset);
-
+		// construct new assembler if this packet is the first received from source
+		if (reassembler == null) {
+			reassembler = new Reassembler(source, destination, createChannelUpstreamHandlers());
+			reassemblersMap.put(source, reassembler);
 		}
+
+		return reassembler;
 	}
 
+	private ChannelUpstreamHandler[] createChannelUpstreamHandlers() {
 
+		ChannelUpstreamHandler[] channelUpstreamHandlers =
+				new ChannelUpstreamHandler[channelUpstreamHandlerFactories.length];
+
+		for (int i = 0; i < channelUpstreamHandlerFactories.length; i++) {
+			ChannelUpstreamHandlerFactory factory = channelUpstreamHandlerFactories[i].getFirst();
+			Object parameters = channelUpstreamHandlerFactories[i].getSecond();
+			channelUpstreamHandlers[i] = factory.create(parameters);
+		}
+
+		return channelUpstreamHandlers;
+	}
 }

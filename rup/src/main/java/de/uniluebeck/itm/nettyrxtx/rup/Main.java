@@ -38,7 +38,7 @@ public class Main {
 
 				pipeline.addLast("FramingDecoder", new DleStxEtxFramingDecoder());
 				pipeline.addLast("ISensePacketDecoder", new ISensePacketDecoder());
-				pipeline.addLast("RUPPacketDecoder", new RUPPacketDecoder());
+				pipeline.addLast("RUPPacketFragmentDecoder", new RUPPacketFragmentDecoder());
 				pipeline.addLast("RUPPacketPayloadExtractor", new RUPPacketPayloadExtractor());
 				pipeline.addLast("RUPPayloadFramingDecoder", new DleStxEtxFramingDecoder());
 				pipeline.addLast("StringDecoder", new StringDecoder(CharsetUtil.UTF_8));
@@ -51,7 +51,7 @@ public class Main {
 					}
 				});
 
-				pipeline.addLast("RUPPacketEncoder", new RUPPacketEncoder());
+				pipeline.addLast("RUPPacketFragmentEncoder", new RUPPacketFragmentEncoder());
 				pipeline.addLast("ISensePacketEncoder", new ISensePacketEncoder());
 				pipeline.addLast("FramingEncoder", new DleStxEtxFramingEncoder());
 

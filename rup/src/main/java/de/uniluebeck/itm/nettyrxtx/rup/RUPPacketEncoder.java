@@ -1,17 +1,22 @@
 package de.uniluebeck.itm.nettyrxtx.rup;
 
-import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
-import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.jboss.netty.channel.SimpleChannelDownstreamHandler;
 
 
-public class RUPPacketEncoder extends OneToOneEncoder {
+public class RUPPacketEncoder  extends SimpleChannelDownstreamHandler {
 
-	@Override
-	protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
-		RUPPacket packet = (RUPPacket) msg;
-		return new ISensePacket(ISensePacketType.PLOT, packet.getChannelBuffer());
+	private int maximumFragmentSize;
+
+	/**
+	 * Constructs a new RUPPacketFragmentEncoder with a maximum fragment size (including 19 bytes packet headers) of
+	 * {@code maximumFragmentSize}. The maximum fragment size is depending on the actual protocol stack that is used
+	 * for the current application, therefore it cannot be statically defined but differs from application to
+	 * application.
+	 *
+	 * @param maximumFragmentSize the maximum fragment size (including 19 bytes of packet headers)
+	 */
+	public RUPPacketEncoder(int maximumFragmentSize) {
+		this.maximumFragmentSize = maximumFragmentSize;
 	}
+
 }

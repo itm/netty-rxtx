@@ -86,6 +86,7 @@ public class DleStxEtxFramingDecoder extends FrameDecoder {
 			}
 		}
 
+		// decoding is not yet complete, we'll need more bytes until we find DLE ETX
 		return null;
 	}
 

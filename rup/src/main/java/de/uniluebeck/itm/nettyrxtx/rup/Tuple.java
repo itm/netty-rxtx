@@ -23,54 +23,93 @@
 
 package de.uniluebeck.itm.nettyrxtx.rup;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A factory for creating or parsing remote UART packets.
+ * An immutable tuple type that takes two elements of type {@code V} and type {@code W}.
+ *
+ * @param <V> the type of the first element of the tuple
+ * @param <W> the type of the second element of the tuple
  */
-public class RUPPacketFactory {
+public class Tuple<V, W> {
 
 	/**
-	 * Creates a new {@link RUPPacket} instance. Bytes will be copied from the source.
-	 *
-	 * @param cmdType		the type of the packet
-	 * @param sequenceNumber the packets sequence number
-	 * @param destination	the destination address
-	 * @param source		 the source address
-	 * @param payload		the payload of the packet
-	 * @return the newly created {@link RUPPacket} instance
+	 * The first element
 	 */
-	public static RUPPacket create(RUPPacketType cmdType, byte sequenceNumber, long destination, long source, byte[] payload) {
-		return new RUPPacketImpl(cmdType.getValue(), sequenceNumber, destination, source, payload);
+	private V first;
+
+	/**
+	 * The second element
+	 */
+	private W second;
+
+	/**
+	 * Constructs a new immutable tuple.
+	 *
+	 * @param first  the first element of the tuple
+	 * @param second the second element of the tuple
+	 */
+	public Tuple(V first, W second) {
+
+		checkNotNull(first);
+		checkNotNull(second);
+
+		this.first = first;
+		this.second = second;
 	}
 
 	/**
-	 * Creates a new {@link RUPPacket} instance. Bytes will be copied from the source.
+	 * Returns the first element of this tuple.
 	 *
-	 * @param cmdType		the type of the packet
-	 * @param sequenceNumber the packets sequence number
-	 * @param destination	the destination address
-	 * @param source		 the source address
-	 * @param payload		the payload of the packet
-	 * @return the newly created {@link RUPPacket} instance
+	 * @return the first element of this tuple
 	 */
-	public static RUPPacket create(byte cmdType, byte sequenceNumber, long destination, long source, byte[] payload) {
-		return new RUPPacketImpl(cmdType, sequenceNumber, destination, source, payload);
+	public V getFirst() {
+		return first;
 	}
 
 	/**
-	 * Wraps a byte-array and exposes it's content as a {@link RUPPacket}.
+	 * Returns the second element of this tuple.
 	 *
-	 * @param bytes the bytes to wrap
-	 * @return a newly created {@link RUPPacket} instance
+	 * @return the second element of this tuple
 	 */
-	public static RUPPacket wrap(byte[] bytes) {
-		return wrap(ChannelBuffers.wrappedBuffer(bytes));
+	public W getSecond() {
+		return second;
 	}
 
-	public static RUPPacket wrap(ChannelBuffer channelBuffer) {
-		return new RUPPacketImpl(channelBuffer);
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		Tuple tuple = (Tuple) o;
+
+		if (!first.equals(tuple.first)) {
+			return false;
+		}
+		if (!second.equals(tuple.second)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = first.hashCode();
+		result = 31 * result + second.hashCode();
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "Tuple{" +
+				"first=" + first +
+				", second=" + second +
+				'}';
 	}
 
 }

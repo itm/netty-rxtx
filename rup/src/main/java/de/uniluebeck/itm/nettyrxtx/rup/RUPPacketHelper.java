@@ -8,8 +8,8 @@ import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
 public class RUPPacketHelper {
 
 	/**
-	 * Checks if {@code type} is one of {@link RUPPacketType#MESSAGE}, {@link RUPPacketType#SINK_REQUEST}
-	 * or {@link RUPPacketType#SINK_RESPONSE}.
+	 * Checks if {@code type} is one of {@link RUPPacket.Type#MESSAGE}, {@link RUPPacket.Type#SINK_REQUEST}
+	 * or {@link RUPPacket.Type#SINK_RESPONSE}.
 	 *
 	 * @param type the byte indicating the packet type
 	 *
@@ -17,15 +17,15 @@ public class RUPPacketHelper {
 	 */
 	public static boolean isRemoteUARTPacket(byte type) {
 		Preconditions.checkNotNull(type);
-		return type == RUPPacketType.MESSAGE.getValue() ||
-				type == RUPPacketType.SINK_REQUEST.getValue() ||
-				type == RUPPacketType.SINK_RESPONSE.getValue() ||
-				type == RUPPacketType.SET_SINK.getValue();
+		return type == RUPPacket.Type.MESSAGE.getValue() ||
+				type == RUPPacket.Type.SINK_REQUEST.getValue() ||
+				type == RUPPacket.Type.SINK_RESPONSE.getValue() ||
+				type == RUPPacket.Type.SET_SINK.getValue();
 	}
 
 	/**
-	 * Checks if the first byte of {@code bytes} is one of {@link RUPPacketType#MESSAGE}, {@link
-	 * RUPPacketType#SINK_REQUEST} or {@link RUPPacketType#SINK_RESPONSE}.
+	 * Checks if the first byte of {@code bytes} is one of {@link RUPPacket.Type#MESSAGE}, {@link
+	 * RUPPacket.Type#SINK_REQUEST} or {@link RUPPacket.Type#SINK_RESPONSE}.
 	 *
 	 * @param bytes the packets byte-array representation
 	 *
@@ -41,8 +41,8 @@ public class RUPPacketHelper {
 	 * Checks if the {@code iSensePacket} contains a Remote UART packet.
 	 * <p/>
 	 * {@code iSensePacket} contains a Remote UART packet if it is of type {@link ISensePacketType#PLOT} and if the first
-	 * byte of its payload is one of {@link RUPPacketType#MESSAGE}, {@link RUPPacketType#SINK_REQUEST} or
-	 * {@link RUPPacketType#SINK_RESPONSE}.
+	 * byte of its payload is one of {@link RUPPacket.Type#MESSAGE}, {@link RUPPacket.Type#SINK_REQUEST} or
+	 * {@link RUPPacket.Type#SINK_RESPONSE}.
 	 *
 	 * @param packet the packet
 	 *
