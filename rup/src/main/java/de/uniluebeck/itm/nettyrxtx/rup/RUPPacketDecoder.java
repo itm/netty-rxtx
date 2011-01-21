@@ -10,7 +10,6 @@ import org.jboss.netty.channel.UpstreamMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
 import java.util.Map;
 
 public class RUPPacketDecoder extends SimpleChannelHandler {
@@ -116,7 +115,7 @@ public class RUPPacketDecoder extends SimpleChannelHandler {
 
 		// if there's no packet at currents offset it might mean we should possibly wait for it to arrive before sending
 		// packages upstream
-		Byte currentOffset = Byte.valueOf((byte) (0xFF & packetBuffer.windowOffset));
+		Byte currentOffset = (byte) (0xFF & packetBuffer.windowOffset);
 		while (packetBuffer.packets.containsKey(currentOffset)) {
 
 			RUPPacket rupPacket = packetBuffer.packets.remove(currentOffset);
@@ -134,7 +133,7 @@ public class RUPPacketDecoder extends SimpleChannelHandler {
 
 			// move windowOffset
 			packetBuffer.windowOffset = (++packetBuffer.windowOffset) % 255;
-			currentOffset = Byte.valueOf((byte) (0xFF & packetBuffer.windowOffset));
+			currentOffset = (byte) (0xFF & packetBuffer.windowOffset);
 
 		}
 	}

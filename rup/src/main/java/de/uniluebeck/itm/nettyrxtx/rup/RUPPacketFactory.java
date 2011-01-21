@@ -34,16 +34,28 @@ public class RUPPacketFactory {
 	/**
 	 * Creates a new {@link RUPPacket} instance. Bytes will be copied from the source.
 	 *
-	 * @param cmdType	 the type of the packet, must be one of {@link RUPPacketType#MESSAGE}, {@link
-	 *                    RUPPacketType#SINK_REQUEST} or {@link RUPPacketType#SINK_RESPONSE}
+	 * @param cmdType		the type of the packet
 	 * @param sequenceNumber the packets sequence number
-	 * @param destination the destination address
-	 * @param source	  the source address
-	 * @param payload	 the payload of the packet
-	 *
+	 * @param destination	the destination address
+	 * @param source		 the source address
+	 * @param payload		the payload of the packet
 	 * @return the newly created {@link RUPPacket} instance
 	 */
 	public static RUPPacket create(RUPPacketType cmdType, byte sequenceNumber, long destination, long source, byte[] payload) {
+		return new RUPPacketImpl(cmdType.getValue(), sequenceNumber, destination, source, payload);
+	}
+
+	/**
+	 * Creates a new {@link RUPPacket} instance. Bytes will be copied from the source.
+	 *
+	 * @param cmdType		the type of the packet
+	 * @param sequenceNumber the packets sequence number
+	 * @param destination	the destination address
+	 * @param source		 the source address
+	 * @param payload		the payload of the packet
+	 * @return the newly created {@link RUPPacket} instance
+	 */
+	public static RUPPacket create(byte cmdType, byte sequenceNumber, long destination, long source, byte[] payload) {
 		return new RUPPacketImpl(cmdType, sequenceNumber, destination, source, payload);
 	}
 
@@ -51,7 +63,6 @@ public class RUPPacketFactory {
 	 * Wraps a byte-array and exposes it's content as a {@link RUPPacket}.
 	 *
 	 * @param bytes the bytes to wrap
-	 *
 	 * @return a newly created {@link RUPPacket} instance
 	 */
 	public static RUPPacket wrap(byte[] bytes) {

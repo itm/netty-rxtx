@@ -8,15 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class ISenseDecoder extends OneToOneDecoder {
+public class ISensePacketDecoder extends OneToOneDecoder {
 
-	private static final Logger log = LoggerFactory.getLogger(ISenseDecoder.class);
+	private static final Logger log = LoggerFactory.getLogger(ISensePacketDecoder.class);
 
 	@Override
 	protected Object decode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
 
 		ChannelBuffer buffer = (ChannelBuffer) msg;
-		ISensePacket iSensePacket = new ISensePacket(buffer.readByte(), buffer.slice());
+		ISensePacket iSensePacket = new ISensePacket(buffer);
 		log.trace("[{}] Decoded ISensePacket: {}", ctx.getName(), iSensePacket);
 		return iSensePacket;
 	}

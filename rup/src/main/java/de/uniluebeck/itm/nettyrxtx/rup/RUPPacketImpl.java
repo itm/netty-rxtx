@@ -47,7 +47,7 @@ class RUPPacketImpl implements RUPPacket {
 		packet = channelBuffer;
 	}
 
-	public RUPPacketImpl(final RUPPacketType cmdType, final byte sequenceNumber, final long destination,
+	public RUPPacketImpl(final byte cmdType, final byte sequenceNumber, final long destination,
 						 final long source,
 						 final byte[] payload) {
 
@@ -58,19 +58,19 @@ class RUPPacketImpl implements RUPPacket {
 		// payload is allowed to be null in case somebody wants to send empty packets
 
 		packet = ChannelBuffers.buffer(1 + 1 + 8 + 8 + 1 + payload.length);
-		packet.writeByte(cmdType.getValue());
+		packet.writeByte(cmdType);
 		packet.writeByte(sequenceNumber);
 		packet.writeLong(destination);
 		packet.writeLong(source);
 		packet.writeByte((byte) (payload.length & 0xFF));
-		if (payload != null && payload.length > 0) {
+		if (payload.length > 0) {
 			packet.writeBytes(payload);
 		}
 
 	}
 
-	public RUPPacketType getCmdType() {
-		return RUPPacketType.fromValue(packet.getByte(0));
+	public byte getCmdType() {
+		return packet.getByte(0);
 	}
 
 	public byte getSequenceNumber() {
