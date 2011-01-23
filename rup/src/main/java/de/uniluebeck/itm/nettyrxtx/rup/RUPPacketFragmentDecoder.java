@@ -26,7 +26,7 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 
 	private static class PacketBuffer {
 
-		private Map<Byte, RUPPacket> packets = Maps.newTreeMap();
+		private Map<Integer, RUPPacket> packets = Maps.newTreeMap();
 
 		private int windowSize = 10;
 
@@ -88,7 +88,7 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 
 		final RUPPacketFragment rupPacketFragment = RUPPacketFragmentFactory.wrap(payload);
 
-		final byte sequenceNumber = rupPacketFragment.getSequenceNumber();
+		final int sequenceNumber = rupPacketFragment.getSequenceNumber();
 		final long source = rupPacketFragment.getSource();
 
 		// get the packetBuffer for the sender of rupPacketFragment
@@ -141,7 +141,7 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 
 		// if there's no packet at currents offset it might mean we should possibly wait for it to arrive before sending
 		// packages upstream
-		Byte currentOffset = (byte) (0xFF & packetBuffer.windowOffset);
+		int currentOffset = packetBuffer.windowOffset;
 		while (packetBuffer.packets.containsKey(currentOffset)) {
 
 			RUPPacket rupPacketFragment = packetBuffer.packets.remove(currentOffset);
@@ -159,7 +159,7 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 
 			// move windowOffset
 			packetBuffer.windowOffset = (++packetBuffer.windowOffset) % 255;
-			currentOffset = (byte) (0xFF & packetBuffer.windowOffset);
+			currentOffset = packetBuffer.windowOffset;
 
 		}
 	}
