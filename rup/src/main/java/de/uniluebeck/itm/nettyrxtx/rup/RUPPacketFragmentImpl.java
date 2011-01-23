@@ -73,7 +73,7 @@ class RUPPacketFragmentImpl implements RUPPacketFragment {
 		packet.writeLong(destination);
 		packet.writeLong(source);
 		packet.writeByte((byte) (payload.length & 0xFF));
-		if (payload.length > 19) {
+		if (payload.length > 0) {
 			packet.writeBytes(payload);
 		}
 

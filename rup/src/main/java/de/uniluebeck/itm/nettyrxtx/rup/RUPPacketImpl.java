@@ -1,6 +1,7 @@
 package de.uniluebeck.itm.nettyrxtx.rup;
 
 import com.google.common.base.Preconditions;
+import de.uniluebeck.itm.nettyrxtx.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
@@ -57,4 +58,13 @@ public class RUPPacketImpl implements RUPPacket {
 		return payload;
 	}
 
+	@Override
+	public String toString() {
+		return "RUPPacketImpl[" +
+				"cmdType=" + cmdType +
+				",destination=" + destination +
+				",source=" + source +
+				",payload=" + StringUtils.toHexString(payload) +
+				']';
+	}
 }

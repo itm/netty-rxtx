@@ -14,7 +14,7 @@ public class PacketData {
 
 	final byte[] payload;
 
-	private PacketData(final byte cmdType, final byte sequenceNumber, final long destination, final long source,
+	public PacketData(final byte cmdType, final byte sequenceNumber, final long destination, final long source,
 					   final byte[] payload) {
 		this.cmdType = cmdType;
 		this.sequenceNumber = sequenceNumber;

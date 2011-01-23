@@ -50,10 +50,6 @@ public class Tuple<V, W> {
 	 * @param second the second element of the tuple
 	 */
 	public Tuple(V first, W second) {
-
-		checkNotNull(first);
-		checkNotNull(second);
-
 		this.first = first;
 		this.second = second;
 	}

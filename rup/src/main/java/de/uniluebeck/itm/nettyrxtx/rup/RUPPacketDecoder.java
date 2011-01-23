@@ -5,6 +5,8 @@ import de.uniluebeck.itm.nettyrxtx.ChannelUpstreamHandlerFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.embedder.DecoderEmbedder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -15,6 +17,8 @@ import java.util.Map;
  * packet headers as the individual fragments (except of the sequenceNumber field).
  */
 public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
+
+	private static final Logger log = LoggerFactory.getLogger(RUPPacketDecoder.class);
 
 	private static class Reassembler {
 
@@ -31,10 +35,10 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 			this.decoder = new DecoderEmbedder<ChannelBuffer>(channelUpstreamHandlers);
 		}
 
-		public RUPPacket[] receiveFragment(final RUPPacket fragmentedRupPacketFragment) {
+		public RUPPacket[] receiveFragment(final RUPPacketFragment fragment) {
 
 			// let the decoder try to reassemble the package
-			decoder.offer(fragmentedRupPacketFragment);
+			decoder.offer(fragment.getPayload());
 
 			// check if one or more packages have been reassembled
 			Object[] decodedPayloads = decoder.pollAll();
@@ -83,18 +87,19 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 	@Override
 	public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
 
-		RUPPacket fragmentedRupPacketFragment = (RUPPacket) e.getMessage();
+		RUPPacketFragment fragment = (RUPPacketFragment) e.getMessage();
 
 		// only reassembly RUP message packets, other types don't need reassembly
-		if (RUPPacket.Type.MESSAGE.getValue() != fragmentedRupPacketFragment.getCmdType()) {
+		if (RUPPacket.Type.MESSAGE.getValue() != fragment.getCmdType()) {
 			ctx.sendUpstream(e);
 			return;
 		}
 
-		Reassembler reassembler = getReassembler(fragmentedRupPacketFragment);
-		RUPPacket[] reassembledPackets = reassembler.receiveFragment(fragmentedRupPacketFragment);
+		Reassembler reassembler = getReassembler(fragment);
+		RUPPacket[] reassembledPackets = reassembler.receiveFragment(fragment);
 
 		for (RUPPacket reassembledPacket : reassembledPackets) {
+			log.trace("[{}] Sending decoded RUPPacket upstream: {}", ctx.getName(), reassembledPacket);
 			Channels.fireMessageReceived(ctx, reassembledPacket);
 		}
 
@@ -103,14 +108,14 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 	/**
 	 * Returns or constructs the Reassembler responsible for packets from the source node of {@code fragmentedRupPacket}.
 	 *
-	 * @param fragmentedRupPacketFragment the packet for which to get the reassembler
+	 * @param fragment the packet for which to get the reassembler
 	 *
 	 * @return the responsible Reassembler instance
 	 */
-	private Reassembler getReassembler(final RUPPacket fragmentedRupPacketFragment) {
+	private Reassembler getReassembler(final RUPPacketFragment fragment) {
 
-		long source = fragmentedRupPacketFragment.getSource();
-		long destination = fragmentedRupPacketFragment.getDestination();
+		long source = fragment.getSource();
+		long destination = fragment.getDestination();
 		Reassembler reassembler = reassemblersMap.get(source);
 
 		// construct new assembler if this packet is the first received from source

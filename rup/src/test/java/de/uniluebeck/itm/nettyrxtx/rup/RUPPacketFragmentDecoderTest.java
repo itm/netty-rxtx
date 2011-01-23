@@ -32,7 +32,7 @@ public class RUPPacketFragmentDecoderTest {
 
 		// randomly generate packet values and remember them
 		final PacketData packetData = PacketData.generateNewPacketFragment();
-		final RUPPacketFragment packetFragment = RUPPacketFragmentFactory.create(
+		final RUPPacketFragment fragment = RUPPacketFragmentFactory.create(
 				packetData.cmdType,
 				packetData.sequenceNumber,
 				packetData.destination,
@@ -41,7 +41,7 @@ public class RUPPacketFragmentDecoderTest {
 		);
 
 		// decode the packet
-		decoder.offer(packetFragment.getChannelBuffer());
+		decoder.offer(fragment.getChannelBuffer());
 		RUPPacketFragment decodedPacketFragment = decoder.poll();
 
 		// at least one packet must have been decoded

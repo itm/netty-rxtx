@@ -42,7 +42,7 @@ public class RUPPacketFragmentFactory {
 	 *
 	 * @return the newly created {@link RUPPacketFragment} instance
 	 */
-	public static RUPPacket create(RUPPacket.Type cmdType, byte sequenceNumber, long destination, long source,
+	public static RUPPacketFragment create(RUPPacket.Type cmdType, byte sequenceNumber, long destination, long source,
 								   byte[] payload) {
 		return new RUPPacketFragmentImpl(cmdType.getValue(), sequenceNumber, destination, source, payload);
 	}
