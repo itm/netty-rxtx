@@ -1,3 +1,26 @@
+/**********************************************************************************************************************
+ * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
+ * All rights reserved.                                                                                               *
+ *                                                                                                                    *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the   *
+ * following conditions are met:                                                                                      *
+ *                                                                                                                    *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following *
+ *   disclaimer.                                                                                                      *
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the        *
+ *   following disclaimer in the documentation and/or other materials provided with the distribution.                 *
+ * - Neither the name of the University of Luebeck nor the names of its contributors may be used to endorse or promote*
+ *   products derived from this software without specific prior written permission.                                   *
+ *                                                                                                                    *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, *
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE      *
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,         *
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE *
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    *
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY   *
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
+ **********************************************************************************************************************/
+
 package de.uniluebeck.itm.nettyrxtx.rup;
 
 import com.google.common.collect.Maps;
@@ -11,14 +34,14 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * Decoder that decodes a series of RUPPacketFragment instances (fragments) into one {@link RUPPacketFragment} by
+ * Decoder that decodes a series of RUPFragment instances (fragments) into one {@link RUPFragment} by
  * applying another decoder (e.g {@link de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoder} on the packets
- * payload. The result of the decoding is on {@link RUPPacketFragment} instance with a reassembled payload and the same
+ * payload. The result of the decoding is on {@link RUPFragment} instance with a reassembled payload and the same
  * packet headers as the individual fragments (except of the sequenceNumber field).
  */
-public class RUPDecoder extends SimpleChannelUpstreamHandler {
+public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(RUPDecoder.class);
+	private static final Logger log = LoggerFactory.getLogger(RUPPacketDecoder.class);
 
 	private static class Reassembler {
 
@@ -35,7 +58,7 @@ public class RUPDecoder extends SimpleChannelUpstreamHandler {
 			this.decoder = new DecoderEmbedder<ChannelBuffer>(channelUpstreamHandlers);
 		}
 
-		public RUPPacket[] receiveFragment(final RUPPacketFragment fragment) {
+		public RUPPacket[] receiveFragment(final RUPFragment fragment) {
 
 			// let the decoder try to reassemble the package
 			decoder.offer(fragment.getPayload());
@@ -67,27 +90,27 @@ public class RUPDecoder extends SimpleChannelUpstreamHandler {
 	private final ChannelUpstreamHandlerFactory[] channelUpstreamHandlerFactories;
 
 	/**
-	 * Map that holds a Reassembler instance for every source address of RUPPacketFragment instances received.
+	 * Map that holds a Reassembler instance for every source address of RUPFragment instances received.
 	 */
 	private final Map<Long, Reassembler> reassemblersMap = Maps.newHashMap();
 
 	/**
-	 * Constructs a new RUPDecoder instance that uses a {@link DecoderEmbedder} that wraps decoders created by the
-	 * {@code channelUpstreamHandlerFactories} to reassemble a RUPPacketFragment (type {@link RUPPacket.Type#MESSAGE})
-	 * instance from a series of RUPPacketFragment fragments. For each RUP endpoint one {@link DecoderEmbedder} instance
+	 * Constructs a new RUPPacketDecoder instance that uses a {@link DecoderEmbedder} that wraps decoders created by the
+	 * {@code channelUpstreamHandlerFactories} to reassemble a RUPFragment (type {@link RUPPacket.Type#MESSAGE})
+	 * instance from a series of RUPFragment fragments. For each RUP endpoint one {@link DecoderEmbedder} instance
 	 * that uses the decoders created by {@code channelUpstreamHandlers}.
 	 *
 	 * @param channelUpstreamHandlerFactories
 	 *         the factories for creating handlers for reassembling the packet from a series of packet fragments
 	 */
-	public RUPDecoder(final ChannelUpstreamHandlerFactory... channelUpstreamHandlerFactories) {
+	public RUPPacketDecoder(final ChannelUpstreamHandlerFactory... channelUpstreamHandlerFactories) {
 		this.channelUpstreamHandlerFactories = channelUpstreamHandlerFactories;
 	}
 
 	@Override
 	public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
 
-		RUPPacketFragment fragment = (RUPPacketFragment) e.getMessage();
+		RUPFragment fragment = (RUPFragment) e.getMessage();
 
 		// only reassembly RUP message packets, other types don't need reassembly
 		if (RUPPacket.Type.MESSAGE.getValue() != fragment.getCmdType()) {
@@ -112,7 +135,7 @@ public class RUPDecoder extends SimpleChannelUpstreamHandler {
 	 *
 	 * @return the responsible Reassembler instance
 	 */
-	private Reassembler getReassembler(final RUPPacketFragment fragment) {
+	private Reassembler getReassembler(final RUPFragment fragment) {
 
 		long source = fragment.getSource();
 		long destination = fragment.getDestination();

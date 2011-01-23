@@ -1,3 +1,26 @@
+/**********************************************************************************************************************
+ * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
+ * All rights reserved.                                                                                               *
+ *                                                                                                                    *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the   *
+ * following conditions are met:                                                                                      *
+ *                                                                                                                    *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following *
+ *   disclaimer.                                                                                                      *
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the        *
+ *   following disclaimer in the documentation and/or other materials provided with the distribution.                 *
+ * - Neither the name of the University of Luebeck nor the names of its contributors may be used to endorse or promote*
+ *   products derived from this software without specific prior written permission.                                   *
+ *                                                                                                                    *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, *
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE      *
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,         *
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE *
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    *
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY   *
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
+ **********************************************************************************************************************/
+
 package de.uniluebeck.itm.nettyrxtx.rup;
 
 
@@ -14,14 +37,14 @@ import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
 
-public class RUPEncoderTest {
+public class RUPPacketEncoderTest {
 
-	private EncoderEmbedder<RUPPacketFragment> encoder;
+	private EncoderEmbedder<RUPFragment> encoder;
 
 	@Before
 	public void setUp() {
-		encoder = new EncoderEmbedder<RUPPacketFragment>(
-				new RUPEncoder(19 + 10 /* header + payload */, new DleStxEtxFramingEncoderFactory())
+		encoder = new EncoderEmbedder<RUPFragment>(
+				new RUPPacketEncoder(19 + 10 /* header + payload */, new DleStxEtxFramingEncoderFactory())
 		);
 	}
 
@@ -42,7 +65,7 @@ public class RUPEncoderTest {
 
 		// encode the packet
 		encoder.offer(packet);
-		RUPPacketFragment decodedFragment = encoder.poll();
+		RUPFragment decodedFragment = encoder.poll();
 
 		// check if one and only one packet has come out from the encoding process
 		assertNotNull(decodedFragment);
@@ -65,9 +88,9 @@ public class RUPEncoderTest {
 		// encode the packet
 		encoder.offer(packet);
 
-		RUPPacketFragment encodedFragment1 = encoder.poll();
-		RUPPacketFragment encodedFragment2 = encoder.poll();
-		RUPPacketFragment encodedFragment3 = encoder.poll();
+		RUPFragment encodedFragment1 = encoder.poll();
+		RUPFragment encodedFragment2 = encoder.poll();
+		RUPFragment encodedFragment3 = encoder.poll();
 
 		// check if three and only three packets have come out from the encoding process
 		assertNotNull(encodedFragment1);
@@ -100,8 +123,8 @@ public class RUPEncoderTest {
 		encoder.offer(packet1);
 		encoder.offer(packet2);
 
-		RUPPacketFragment encodedFragment1 = encoder.poll();
-		RUPPacketFragment encodedFragment2 = encoder.poll();
+		RUPFragment encodedFragment1 = encoder.poll();
+		RUPFragment encodedFragment2 = encoder.poll();
 
 		// check if one and only one packet1 has come out from the encoding process
 		assertNotNull(encodedFragment1);
@@ -133,12 +156,12 @@ public class RUPEncoderTest {
 		encoder.offer(packet1);
 		encoder.offer(packet2);
 
-		RUPPacketFragment encodedFragment11 = encoder.poll();
-		RUPPacketFragment encodedFragment12 = encoder.poll();
-		RUPPacketFragment encodedFragment13 = encoder.poll();
-		RUPPacketFragment encodedFragment21 = encoder.poll();
-		RUPPacketFragment encodedFragment22 = encoder.poll();
-		RUPPacketFragment encodedFragment23 = encoder.poll();
+		RUPFragment encodedFragment11 = encoder.poll();
+		RUPFragment encodedFragment12 = encoder.poll();
+		RUPFragment encodedFragment13 = encoder.poll();
+		RUPFragment encodedFragment21 = encoder.poll();
+		RUPFragment encodedFragment22 = encoder.poll();
+		RUPFragment encodedFragment23 = encoder.poll();
 
 		// check if three and only three fragment per packets have come out from the encoding process
 		assertNotNull(encodedFragment11);
@@ -158,7 +181,7 @@ public class RUPEncoderTest {
 		assertPacketCorrect(0x2345, 0x5432, constructPayload(false, true, "21"), encodedFragment23);
 	}
 
-	private void assertPacketCorrect(long destination, long source, byte[] payload, RUPPacketFragment encodedFragment) {
+	private void assertPacketCorrect(long destination, long source, byte[] payload, RUPFragment encodedFragment) {
 
 		assertEquals(destination, encodedFragment.getDestination());
 		assertEquals(source, encodedFragment.getSource());

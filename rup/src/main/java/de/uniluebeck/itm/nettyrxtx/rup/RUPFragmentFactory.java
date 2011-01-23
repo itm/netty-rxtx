@@ -1,5 +1,5 @@
 /**********************************************************************************************************************
- * Copyright (c) 2010, Institute of Telematics, University of Luebeck                                                 *
+ * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
  * All rights reserved.                                                                                               *
  *                                                                                                                    *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the   *
@@ -32,7 +32,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 public class RUPFragmentFactory {
 
 	/**
-	 * Creates a new {@link RUPPacketFragment} instance. Bytes will be copied from the source.
+	 * Creates a new {@link RUPFragment} instance. Bytes will be copied from the source.
 	 *
 	 * @param cmdType		the type of the packet
 	 * @param sequenceNumber the packets sequence number
@@ -40,15 +40,15 @@ public class RUPFragmentFactory {
 	 * @param source		 the source address
 	 * @param payload		the payload of the packet
 	 *
-	 * @return the newly created {@link RUPPacketFragment} instance
+	 * @return the newly created {@link RUPFragment} instance
 	 */
-	public static RUPPacketFragment create(RUPPacket.Type cmdType, byte sequenceNumber, long destination, long source,
+	public static RUPFragment create(RUPPacket.Type cmdType, byte sequenceNumber, long destination, long source,
 								   byte[] payload) {
 		return new RUPFragmentImpl(cmdType.getValue(), sequenceNumber, destination, source, payload);
 	}
 
 	/**
-	 * Creates a new {@link RUPPacketFragment} instance. Bytes will be copied from the source.
+	 * Creates a new {@link RUPFragment} instance. Bytes will be copied from the source.
 	 *
 	 * @param cmdType		the type of the packet
 	 * @param sequenceNumber the packets sequence number
@@ -56,14 +56,14 @@ public class RUPFragmentFactory {
 	 * @param source		 the source address
 	 * @param payload		the payload of the packet
 	 *
-	 * @return the newly created {@link RUPPacketFragment} instance
+	 * @return the newly created {@link RUPFragment} instance
 	 */
-	public static RUPPacketFragment create(byte cmdType, byte sequenceNumber, long destination, long source, byte[] payload) {
+	public static RUPFragment create(byte cmdType, byte sequenceNumber, long destination, long source, byte[] payload) {
 		return new RUPFragmentImpl(cmdType, sequenceNumber, destination, source, payload);
 	}
 
 	/**
-	 * Creates a new {@link RUPPacketFragment} instance. {@code payload} bytes will be wrapped.
+	 * Creates a new {@link RUPFragment} instance. {@code payload} bytes will be wrapped.
 	 *
 	 * @param cmdType		the type of the packet
 	 * @param sequenceNumber the packets sequence number
@@ -71,24 +71,24 @@ public class RUPFragmentFactory {
 	 * @param source		 the source address
 	 * @param payload		the payload of the packet
 	 *
-	 * @return the newly created {@link RUPPacketFragment} instance
+	 * @return the newly created {@link RUPFragment} instance
 	 */
-	public static RUPPacketFragment create(byte cmdType, byte sequenceNumber, long destination, long source, ChannelBuffer payload) {
+	public static RUPFragment create(byte cmdType, byte sequenceNumber, long destination, long source, ChannelBuffer payload) {
 		return new RUPFragmentImpl(cmdType, sequenceNumber, destination, source, payload);
 	}
 
 	/**
-	 * Wraps a byte-array and exposes it's content as a {@link RUPPacketFragment}.
+	 * Wraps a byte-array and exposes it's content as a {@link RUPFragment}.
 	 *
 	 * @param bytes the bytes to wrap
 	 *
-	 * @return a newly created {@link RUPPacketFragment} instance
+	 * @return a newly created {@link RUPFragment} instance
 	 */
-	public static RUPPacketFragment wrap(byte[] bytes) {
+	public static RUPFragment wrap(byte[] bytes) {
 		return wrap(ChannelBuffers.wrappedBuffer(bytes));
 	}
 
-	public static RUPPacketFragment wrap(ChannelBuffer channelBuffer) {
+	public static RUPFragment wrap(ChannelBuffer channelBuffer) {
 		return new RUPFragmentImpl(channelBuffer);
 	}
 

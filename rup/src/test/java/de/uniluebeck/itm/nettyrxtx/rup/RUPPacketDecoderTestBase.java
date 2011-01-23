@@ -23,97 +23,70 @@
 
 package de.uniluebeck.itm.nettyrxtx.rup;
 
+import com.google.common.collect.Maps;
+import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxConstants;
 import org.jboss.netty.buffer.ChannelBuffer;
 
-/**
- * Interface that represents a Remote UART packet.
- */
-public interface RUPPacket {
+import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.Random;
 
-	public enum Type {
 
-		/**
-		 * A remote UART message.
-		 */
-		MESSAGE((byte) (0xFF & 60)),
+public abstract class RUPPacketDecoderTestBase {
 
-		/**
-		 * A remote UART message indicating that a node request a sink to send its output to.
-		 */
-		SINK_REQUEST((byte) (0xFF & 61)),
+	private Random random;
 
-		/**
-		 * A remote UART message indicating that the sender of this message offers to be a sink for the requester.
-		 */
-		SINK_RESPONSE((byte) (0xFF & 62)),
+	private Map<Long, Byte> lastSequenceNumbers;
 
-		/**
-		 * A remote UART message that can be sent to the connected node to tell him to be sink for other nodes.
-		 */
-		SET_SINK((byte) (0xFF & 63));
-
-		private final byte value;
-
-		private Type(byte value) {
-			this.value = value;
-		}
-
-		public byte getValue() {
-			return value;
-		}
-
-		/**
-		 * Returns the enum constant with value {@code value} or {@code null} if no RUPPacketType exists with value {@code
-		 * value}.
-		 *
-		 * @param value the byte value of the packet type
-		 *
-		 * @return an RUPPacketType enum constant or {@code null} if {@code value} does not match
-		 */
-		public static Type fromValue(byte value) {
-			switch (value) {
-				case 60:
-					return MESSAGE;
-				case 61:
-					return SINK_REQUEST;
-				case 62:
-					return SINK_RESPONSE;
-				case 63:
-					return SET_SINK;
-				default:
-					return null;
-			}
-		}
+	protected void setUp() {
+		random = new Random();
+		lastSequenceNumbers = Maps.newHashMap();
 	}
 
-	/**
-	 * Returns the packets type.
-	 *
-	 * @return the packets type
-	 */
-	byte getCmdType();
+	protected void tearDown() {
+		random = null;
+		lastSequenceNumbers = null;
+	}
 
-	/**
-	 * Returns the destination address.
-	 *
-	 * @return the destination address
-	 */
-	long getDestination();
+	protected ChannelBuffer createOpeningAndClosingMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
+		ByteBuffer bb = ByteBuffer.allocate(2 + 2 + payload.getBytes().length);
+		bb.put(DleStxEtxConstants.DLE_STX);
+		bb.put(payload.getBytes());
+		bb.put(DleStxEtxConstants.DLE_ETX);
+		return RUPFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
+	}
 
-	/**
-	 * Returns the source address.
-	 *
-	 * @return the source address
-	 */
-	long getSource();
+	protected ChannelBuffer createOpeningMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
+		ByteBuffer bb = ByteBuffer.allocate(2 + payload.getBytes().length);
+		bb.put(DleStxEtxConstants.DLE_STX);
+		bb.put(payload.getBytes());
+		return RUPFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
+	}
 
-	/**
-	 * Returns the payload of the packet. <b>Attention:</b> If this is an instance of RUPPacket the returned ChannelBuffer
-	 * is the original buffer, not a copy. If this is an instanceof RUPFragment the returned ChannelBuffer is a slice
-	 * of the backing ChannelBuffer object. Any changes to the returned buffer will be reflected by the packets buffer.
-	 *
-	 * @return the payload
-	 */
-	ChannelBuffer getPayload();
+	protected ChannelBuffer createMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
+		return RUPFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, payload.getBytes()).getChannelBuffer();
+	}
 
+	protected ChannelBuffer createClosingMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
+		ByteBuffer bb = ByteBuffer.allocate(2 + payload.getBytes().length);
+		bb.put(payload.getBytes());
+		bb.put(DleStxEtxConstants.DLE_ETX);
+		return RUPFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
+	}
+
+	protected byte getRandomSequenceNumber(long sender) {
+		byte sequenceNumber = (byte) (0xFF & (random.nextInt(255) % 255));
+		lastSequenceNumbers.put(sender, sequenceNumber);
+		return sequenceNumber;
+	}
+
+	protected byte getSubsequentSequenceNumber(long sender) {
+		if (!lastSequenceNumbers.containsKey(sender)) {
+			throw new IllegalArgumentException("No first sequence number existing!");
+		}
+		byte lastSequenceNumber = lastSequenceNumbers.get(sender);
+		byte sequenceNumber = (byte) (0xFF & ((lastSequenceNumber + 1) % 255));
+		lastSequenceNumbers.put(sender, sequenceNumber);
+		return sequenceNumber;
+	}
 }

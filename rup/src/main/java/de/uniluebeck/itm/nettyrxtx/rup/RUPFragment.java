@@ -1,5 +1,5 @@
 /**********************************************************************************************************************
- * Copyright (c) 2010, Institute of Telematics, University of Luebeck                                                 *
+ * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
  * All rights reserved.                                                                                               *
  *                                                                                                                    *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the   *
@@ -28,7 +28,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 /**
  * Interface that represents a Remote UART packet fragment.
  */
-public interface RUPPacketFragment extends RUPPacket {
+public interface RUPFragment extends RUPPacket {
 
 	/**
 	 * Returns the packets sequence number.

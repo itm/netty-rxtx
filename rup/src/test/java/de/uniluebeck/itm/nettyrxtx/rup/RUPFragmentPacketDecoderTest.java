@@ -1,3 +1,26 @@
+/**********************************************************************************************************************
+ * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
+ * All rights reserved.                                                                                               *
+ *                                                                                                                    *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the   *
+ * following conditions are met:                                                                                      *
+ *                                                                                                                    *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following *
+ *   disclaimer.                                                                                                      *
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the        *
+ *   following disclaimer in the documentation and/or other materials provided with the distribution.                 *
+ * - Neither the name of the University of Luebeck nor the names of its contributors may be used to endorse or promote*
+ *   products derived from this software without specific prior written permission.                                   *
+ *                                                                                                                    *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, *
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE      *
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,         *
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE *
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    *
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY   *
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
+ **********************************************************************************************************************/
+
 package de.uniluebeck.itm.nettyrxtx.rup;
 
 
@@ -9,14 +32,14 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
+public class RUPFragmentPacketDecoderTest extends RUPPacketDecoderTestBase {
 
-	private DecoderEmbedder<RUPPacketFragment> decoder;
+	private DecoderEmbedder<RUPFragment> decoder;
 
 	@Before
 	public void setUp() {
 		super.setUp();
-		decoder = new DecoderEmbedder<RUPPacketFragment>(
+		decoder = new DecoderEmbedder<RUPFragment>(
 				new RUPFragmentDecoder()
 		);
 	}
@@ -40,15 +63,15 @@ public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
 		// decode the packet
 		decoder.offer(fragment);
 
-		RUPPacketFragment decodedPacketFragment = decoder.poll();
+		RUPFragment decodedFragment = decoder.poll();
 
 		// at least one packet must have been decoded
-		assertNotNull(decodedPacketFragment);
+		assertNotNull(decodedFragment);
 
 		// only one packet should have been decoded
 		assertNull(decoder.poll());
 
-		assertPacketCorrect(randomSequenceNumber, 0x1234, 0x4321, "hello, world", decodedPacketFragment);
+		assertPacketCorrect(randomSequenceNumber, 0x1234, 0x4321, "hello, world", decodedFragment);
 	}
 
 	/**
@@ -72,9 +95,9 @@ public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
 		decoder.offer(fragment2);
 		decoder.offer(fragment3);
 
-		RUPPacketFragment decodedFragment1 = decoder.poll();
-		RUPPacketFragment decodedFragment2 = decoder.poll();
-		RUPPacketFragment decodedFragment3 = decoder.poll();
+		RUPFragment decodedFragment1 = decoder.poll();
+		RUPFragment decodedFragment2 = decoder.poll();
+		RUPFragment decodedFragment3 = decoder.poll();
 
 		// at least three packets must have been decoded
 		assertNotNull(decodedFragment1);
@@ -110,9 +133,9 @@ public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
 		decoder.offer(fragment3);
 		decoder.offer(fragment2);
 
-		RUPPacketFragment decodedFragment1 = decoder.poll();
-		RUPPacketFragment decodedFragment2 = decoder.poll();
-		RUPPacketFragment decodedFragment3 = decoder.poll();
+		RUPFragment decodedFragment1 = decoder.poll();
+		RUPFragment decodedFragment2 = decoder.poll();
+		RUPFragment decodedFragment3 = decoder.poll();
 
 		// at least three packets must have been decoded
 		assertNotNull(decodedFragment1);
@@ -136,7 +159,7 @@ public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
 	public void testEmptyPacketFragment() {
 		byte sequenceNumber = getRandomSequenceNumber(0x4321);
 		decoder.offer(createMessageFragment(sequenceNumber, 0x1234, 0x4321, ""));
-		RUPPacketFragment decodedFragment = decoder.poll();
+		RUPFragment decodedFragment = decoder.poll();
 		assertNotNull(decodedFragment);
 		assertPacketCorrect(sequenceNumber, 0x1234, 0x4321, "", decodedFragment);
 	}
@@ -161,9 +184,9 @@ public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
 		decoder.offer(fragment2);
 		decoder.offer(fragment3);
 
-		RUPPacketFragment decodedFragment1 = decoder.poll();
-		RUPPacketFragment decodedFragment2 = decoder.poll();
-		RUPPacketFragment decodedFragment3 = decoder.poll();
+		RUPFragment decodedFragment1 = decoder.poll();
+		RUPFragment decodedFragment2 = decoder.poll();
+		RUPFragment decodedFragment3 = decoder.poll();
 
 		// at least three packets must have been decoded
 		assertNotNull(decodedFragment1);
@@ -202,10 +225,10 @@ public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
 		decoder.offer(fragment12);
 		decoder.offer(fragment22);
 
-		RUPPacketFragment decodedFragment11 = decoder.poll();
-		RUPPacketFragment decodedFragment21 = decoder.poll();
-		RUPPacketFragment decodedFragment12 = decoder.poll();
-		RUPPacketFragment decodedFragment22 = decoder.poll();
+		RUPFragment decodedFragment11 = decoder.poll();
+		RUPFragment decodedFragment21 = decoder.poll();
+		RUPFragment decodedFragment12 = decoder.poll();
+		RUPFragment decodedFragment22 = decoder.poll();
 
 		// at least four packets must have been decoded
 		assertNotNull(decodedFragment11);
@@ -224,7 +247,7 @@ public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
 	}
 
 	private void assertPacketCorrect(byte expectedSequenceNumber, long expectedDestination, long expectedSource,
-									 String expectedPayload, RUPPacketFragment decodedPacket) {
+									 String expectedPayload, RUPFragment decodedPacket) {
 
 		// compare expected headers with decoded headers
 		assertTrue(RUPPacket.Type.MESSAGE.getValue() == decodedPacket.getCmdType());

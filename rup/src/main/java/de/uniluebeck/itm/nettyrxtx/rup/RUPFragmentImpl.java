@@ -1,5 +1,5 @@
 /**********************************************************************************************************************
- * Copyright (c) 2010, Institute of Telematics, University of Luebeck                                                 *
+ * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
  * All rights reserved.                                                                                               *
  *                                                                                                                    *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the   *
@@ -31,7 +31,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import java.util.Arrays;
 
 
-class RUPFragmentImpl implements RUPPacketFragment {
+class RUPFragmentImpl implements RUPFragment {
 
 	private static final int POS_CMD_TYPE = 0;
 
@@ -51,7 +51,7 @@ class RUPFragmentImpl implements RUPPacketFragment {
 		Preconditions.checkArgument(
 				channelBuffer.readableBytes() >= 19,
 				"Unable to parse %s from %s as bytes is too short.",
-				RUPPacketFragment.class.getSimpleName(), channelBuffer
+				RUPFragment.class.getSimpleName(), channelBuffer
 		);
 
 		packet = channelBuffer;
@@ -131,7 +131,7 @@ class RUPFragmentImpl implements RUPPacketFragment {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RUPPacketFragment[cmdType=");
+		builder.append("RUPFragment[cmdType=");
 		builder.append(getCmdType());
 		builder.append(",sequenceNumber=");
 		builder.append(getSequenceNumber());
