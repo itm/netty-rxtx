@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
 		<artifactId>netty-rxtx-parent</artifactId>
-		<version>0.9-SNAPSHOT</version>
+		<version>0.1-SNAPSHOT</version>
 		<relativePath>../</relativePath>
 	</parent>
 

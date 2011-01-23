@@ -1,12 +1,12 @@
 package de.uniluebeck.itm.nettyrxtx.rup;
 
 
-import de.uniluebeck.itm.nettyrxtx.ChannelUpstreamHandlerFactory;
 import de.uniluebeck.itm.nettyrxtx.RXTXChannelFactory;
 import de.uniluebeck.itm.nettyrxtx.RXTXDeviceAddress;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoder;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoderFactory;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingEncoder;
+import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingEncoderFactory;
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketDecoder;
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketEncoder;
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -42,7 +42,7 @@ public class Main {
 				pipeline.addLast("FramingDecoder", new DleStxEtxFramingDecoder());
 				pipeline.addLast("ISensePacketDecoder", new ISensePacketDecoder());
 				pipeline.addLast("RUPPacketFragmentDecoder", new RUPPacketFragmentDecoder());
-				pipeline.addLast("RUPPacketDecoder", new RUPPacketDecoder(new Tuple<ChannelUpstreamHandlerFactory, Object>(new DleStxEtxFramingDecoderFactory(), null)));
+				pipeline.addLast("RUPPacketDecoder", new RUPPacketDecoder(new DleStxEtxFramingDecoderFactory()));
 				pipeline.addLast("StringDecoder", new StringDecoder(CharsetUtil.UTF_8));
 
 				pipeline.addLast("LoggingHandler", new SimpleChannelHandler() {
@@ -56,6 +56,7 @@ public class Main {
 					}
 				});
 
+				pipeline.addLast("RUPPacketEncoderTest", new RUPPacketEncoder(80, new DleStxEtxFramingEncoderFactory()));
 				pipeline.addLast("RUPPacketFragmentEncoder", new RUPPacketFragmentEncoder());
 				pipeline.addLast("ISensePacketEncoder", new ISensePacketEncoder());
 				pipeline.addLast("FramingEncoder", new DleStxEtxFramingEncoder());

@@ -61,21 +61,25 @@ class RUPPacketFragmentImpl implements RUPPacketFragment {
 								 final long source,
 								 final byte[] payload) {
 
+		this(cmdType, sequenceNumber, destination, source, ChannelBuffers.wrappedBuffer(payload));
+	}
+
+	public RUPPacketFragmentImpl(byte cmdType, byte sequenceNumber, long destination, long source, ChannelBuffer payload) {
+
 		Preconditions.checkNotNull(cmdType, "cmdType is null");
 		Preconditions.checkNotNull(sequenceNumber, "sequenceNumber is null");
 		Preconditions.checkNotNull(destination, "destination is null");
 		Preconditions.checkNotNull(source, "source is null");
 		// payload is allowed to be null in case somebody wants to send empty packets
 
-		packet = ChannelBuffers.buffer(1 + 1 + 8 + 8 + 1 + payload.length);
-		packet.writeByte(cmdType);
-		packet.writeByte(sequenceNumber);
-		packet.writeLong(destination);
-		packet.writeLong(source);
-		packet.writeByte((byte) (payload.length & 0xFF));
-		if (payload.length > 0) {
-			packet.writeBytes(payload);
-		}
+		ChannelBuffer headers = ChannelBuffers.buffer(1 + 1 + 8 + 8 + 1);
+		headers.writeByte(cmdType);
+		headers.writeByte(sequenceNumber);
+		headers.writeLong(destination);
+		headers.writeLong(source);
+		headers.writeByte((byte) (payload.readableBytes() & 0xFF));
+
+		packet = ChannelBuffers.wrappedBuffer(headers, payload);
 
 	}
 

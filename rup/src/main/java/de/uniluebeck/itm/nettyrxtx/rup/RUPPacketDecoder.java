@@ -64,7 +64,7 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 	 * A set of factories that are called to create ChannelUpstreamHandler instances upon creation of a new Reassembler
 	 * instance.
 	 */
-	private final Tuple<ChannelUpstreamHandlerFactory, Object>[] channelUpstreamHandlerFactories;
+	private final ChannelUpstreamHandlerFactory[] channelUpstreamHandlerFactories;
 
 	/**
 	 * Map that holds a Reassembler instance for every source address of RUPPacketFragment instances received.
@@ -80,7 +80,7 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 	 * @param channelUpstreamHandlerFactories
 	 *         the factories for creating handlers for reassembling the packet from a series of packet fragments
 	 */
-	public RUPPacketDecoder(final Tuple<ChannelUpstreamHandlerFactory, Object>... channelUpstreamHandlerFactories) {
+	public RUPPacketDecoder(final ChannelUpstreamHandlerFactory... channelUpstreamHandlerFactories) {
 		this.channelUpstreamHandlerFactories = channelUpstreamHandlerFactories;
 	}
 
@@ -133,9 +133,7 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 				new ChannelUpstreamHandler[channelUpstreamHandlerFactories.length];
 
 		for (int i = 0; i < channelUpstreamHandlerFactories.length; i++) {
-			ChannelUpstreamHandlerFactory factory = channelUpstreamHandlerFactories[i].getFirst();
-			Object parameters = channelUpstreamHandlerFactories[i].getSecond();
-			channelUpstreamHandlers[i] = factory.create(parameters);
+			channelUpstreamHandlers[i] = channelUpstreamHandlerFactories[i].create();
 		}
 
 		return channelUpstreamHandlers;

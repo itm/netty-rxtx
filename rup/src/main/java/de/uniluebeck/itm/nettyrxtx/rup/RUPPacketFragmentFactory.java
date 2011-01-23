@@ -63,6 +63,21 @@ public class RUPPacketFragmentFactory {
 	}
 
 	/**
+	 * Creates a new {@link RUPPacketFragment} instance. {@code payload} bytes will be wrapped.
+	 *
+	 * @param cmdType		the type of the packet
+	 * @param sequenceNumber the packets sequence number
+	 * @param destination	the destination address
+	 * @param source		 the source address
+	 * @param payload		the payload of the packet
+	 *
+	 * @return the newly created {@link RUPPacketFragment} instance
+	 */
+	public static RUPPacketFragment create(byte cmdType, byte sequenceNumber, long destination, long source, ChannelBuffer payload) {
+		return new RUPPacketFragmentImpl(cmdType, sequenceNumber, destination, source, payload);
+	}
+
+	/**
 	 * Wraps a byte-array and exposes it's content as a {@link RUPPacketFragment}.
 	 *
 	 * @param bytes the bytes to wrap

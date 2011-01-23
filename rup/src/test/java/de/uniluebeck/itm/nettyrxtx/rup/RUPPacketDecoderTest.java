@@ -19,9 +19,7 @@ public class RUPPacketDecoderTest extends RUPDecoderTestBase {
 		super.setUp();
 		decoder = new DecoderEmbedder<RUPPacket>(
 				new RUPPacketFragmentDecoder(),
-				new RUPPacketDecoder(
-						new Tuple<ChannelUpstreamHandlerFactory, Object>(new DleStxEtxFramingDecoderFactory(), null)
-				)
+				new RUPPacketDecoder(new DleStxEtxFramingDecoderFactory())
 		);
 	}
 

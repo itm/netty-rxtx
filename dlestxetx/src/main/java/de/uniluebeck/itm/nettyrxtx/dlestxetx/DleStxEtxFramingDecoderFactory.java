@@ -6,7 +6,7 @@ import org.jboss.netty.channel.ChannelUpstreamHandler;
 
 public class DleStxEtxFramingDecoderFactory implements ChannelUpstreamHandlerFactory {
 
-	public ChannelUpstreamHandler create(final Object parameters) {
+	public ChannelUpstreamHandler create() {
 		return new DleStxEtxFramingDecoder();
 	}
 }
