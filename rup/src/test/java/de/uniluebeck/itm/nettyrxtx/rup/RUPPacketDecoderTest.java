@@ -1,45 +1,34 @@
 package de.uniluebeck.itm.nettyrxtx.rup;
 
-import com.google.common.collect.Maps;
 import de.uniluebeck.itm.nettyrxtx.ChannelUpstreamHandlerFactory;
-import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxConstants;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoderFactory;
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.embedder.DecoderEmbedder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Random;
-
 import static org.junit.Assert.*;
 
 
-public class RUPPacketDecoderTest {
+public class RUPPacketDecoderTest extends RUPDecoderTestBase {
 
 	private DecoderEmbedder<RUPPacket> decoder;
 
-	private Random random;
-
-	private Map<Long, Byte> lastSequenceNumbers = Maps.newHashMap();
-
 	@Before
 	public void setUp() {
+		super.setUp();
 		decoder = new DecoderEmbedder<RUPPacket>(
 				new RUPPacketFragmentDecoder(),
 				new RUPPacketDecoder(
 						new Tuple<ChannelUpstreamHandlerFactory, Object>(new DleStxEtxFramingDecoderFactory(), null)
 				)
 		);
-		random = new Random();
 	}
 
 	@After
 	public void tearDown() {
 		decoder = null;
-		random = null;
+		super.tearDown();
 	}
 
 	/**
@@ -211,48 +200,6 @@ public class RUPPacketDecoderTest {
 		decodedPacket.getPayload().readBytes(decodedPayload);
 		assertArrayEquals(expectedPayload.getBytes(), decodedPayload);
 
-	}
-
-	private ChannelBuffer createOpeningAndClosingMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
-		ByteBuffer bb = ByteBuffer.allocate(2 + 2 + payload.getBytes().length);
-		bb.put(DleStxEtxConstants.DLE_STX);
-		bb.put(payload.getBytes());
-		bb.put(DleStxEtxConstants.DLE_ETX);
-		return RUPPacketFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
-	}
-
-	private ChannelBuffer createOpeningMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
-		ByteBuffer bb = ByteBuffer.allocate(2 + payload.getBytes().length);
-		bb.put(DleStxEtxConstants.DLE_STX);
-		bb.put(payload.getBytes());
-		return RUPPacketFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
-	}
-
-	private ChannelBuffer createMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
-		return RUPPacketFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, payload.getBytes()).getChannelBuffer();
-	}
-
-	private ChannelBuffer createClosingMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
-		ByteBuffer bb = ByteBuffer.allocate(2 + payload.getBytes().length);
-		bb.put(payload.getBytes());
-		bb.put(DleStxEtxConstants.DLE_ETX);
-		return RUPPacketFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
-	}
-
-	private byte getRandomSequenceNumber(long sender) {
-		byte sequenceNumber = (byte) (0xFF & (random.nextInt(255) % 255));
-		lastSequenceNumbers.put(sender, sequenceNumber);
-		return sequenceNumber;
-	}
-
-	private byte getSubsequentSequenceNumber(long sender) {
-		if (!lastSequenceNumbers.containsKey(sender)) {
-			throw new IllegalArgumentException("No first sequence number existing!");
-		}
-		byte lastSequenceNumber = lastSequenceNumbers.get(sender);
-		byte sequenceNumber = (byte) (0xFF & ((lastSequenceNumber + 1) % 255));
-		lastSequenceNumbers.put(sender, sequenceNumber);
-		return sequenceNumber;
 	}
 
 }

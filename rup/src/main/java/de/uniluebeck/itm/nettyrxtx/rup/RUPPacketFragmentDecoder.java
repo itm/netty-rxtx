@@ -86,12 +86,12 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 			);
 		}
 
-		final RUPPacketFragment rupPacketFragment = RUPPacketFragmentFactory.wrap(payload);
+		final RUPPacketFragment fragment = RUPPacketFragmentFactory.wrap(payload);
 
-		final int sequenceNumber = rupPacketFragment.getSequenceNumber();
-		final long source = rupPacketFragment.getSource();
+		final int sequenceNumber = fragment.getSequenceNumber();
+		final long source = fragment.getSource();
 
-		// get the packetBuffer for the sender of rupPacketFragment
+		// get the packetBuffer for the sender of fragment
 		PacketBuffer packetBuffer = packetBuffers.get(source);
 		if (packetBuffer == null) {
 			packetBuffer = new PacketBuffer();
@@ -112,12 +112,12 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 								ctx.getName(),
 								packetBuffer.windowOffset,
 								((packetBuffer.windowOffset + packetBuffer.windowSize) % 255),
-								rupPacketFragment
+								fragment
 						}
 				);
 			}
 
-			packetBuffer.packets.put(sequenceNumber, rupPacketFragment);
+			packetBuffer.packets.put(sequenceNumber, fragment);
 			sendUpstreamIfBuffered(packetBuffer, ctx);
 
 		}
@@ -129,7 +129,7 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 						ctx.getName(),
 						packetBuffer.windowOffset,
 						((packetBuffer.windowOffset + packetBuffer.windowSize) % 255),
-						rupPacketFragment
+						fragment
 				}
 				);
 			}
