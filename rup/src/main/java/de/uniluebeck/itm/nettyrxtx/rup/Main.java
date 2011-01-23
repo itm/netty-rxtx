@@ -41,8 +41,8 @@ public class Main {
 
 				pipeline.addLast("FramingDecoder", new DleStxEtxFramingDecoder());
 				pipeline.addLast("ISensePacketDecoder", new ISensePacketDecoder());
-				pipeline.addLast("RUPPacketFragmentDecoder", new RUPPacketFragmentDecoder());
-				pipeline.addLast("RUPPacketDecoder", new RUPPacketDecoder(new DleStxEtxFramingDecoderFactory()));
+				pipeline.addLast("RUPFragmentDecoder", new RUPFragmentDecoder());
+				pipeline.addLast("RUPDecoder", new RUPDecoder(new DleStxEtxFramingDecoderFactory()));
 				pipeline.addLast("StringDecoder", new StringDecoder(CharsetUtil.UTF_8));
 
 				pipeline.addLast("LoggingHandler", new SimpleChannelHandler() {
@@ -56,8 +56,8 @@ public class Main {
 					}
 				});
 
-				pipeline.addLast("RUPPacketEncoderTest", new RUPPacketEncoder(80, new DleStxEtxFramingEncoderFactory()));
-				pipeline.addLast("RUPPacketFragmentEncoder", new RUPPacketFragmentEncoder());
+				pipeline.addLast("RUPEncoder", new RUPEncoder(80, new DleStxEtxFramingEncoderFactory()));
+				pipeline.addLast("RUPFragmentEncoder", new RUPFragmentEncoder());
 				pipeline.addLast("ISensePacketEncoder", new ISensePacketEncoder());
 				pipeline.addLast("FramingEncoder", new DleStxEtxFramingEncoder());
 

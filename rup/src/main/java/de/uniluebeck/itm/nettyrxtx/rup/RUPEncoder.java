@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
+public class RUPEncoder extends SimpleChannelDownstreamHandler {
 
 	private static class Fragmenter {
 
@@ -58,7 +58,7 @@ public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 
 				int bytesToWrite = payloadBytesRemaining < maximumFragmentPayloadSize ? payloadBytesRemaining : maximumFragmentPayloadSize;
 
-				fragments.add(RUPPacketFragmentFactory.create(
+				fragments.add(RUPFragmentFactory.create(
 						packet.getCmdType(),
 						getNextSequenceNumber(),
 						packet.getDestination(),
@@ -96,7 +96,7 @@ public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 	private Map<Long, Fragmenter> fragmenters = Maps.newHashMap();
 
 	/**
-	 * Constructs a new RUPPacketFragmentEncoder with a maximum fragment size (including 19 bytes RUP packet headers) of
+	 * Constructs a new RUPFragmentEncoder with a maximum fragment size (including 19 bytes RUP packet headers) of
 	 * {@code maximumFragmentSize}. The maximum fragment size is depending on the actual protocol stack that is used
 	 * for the current application, therefore it cannot be statically defined but differs from application to
 	 * application.
@@ -108,7 +108,7 @@ public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 	 * @param channelDownstreamHandlerFactories a set of factories that create e.g. encoders to encode a packets payload
 	 *
 	 */
-	public RUPPacketEncoder(int maximumFragmentSize, ChannelDownstreamHandlerFactory... channelDownstreamHandlerFactories) {
+	public RUPEncoder(int maximumFragmentSize, ChannelDownstreamHandlerFactory... channelDownstreamHandlerFactories) {
 		this.maximumFragmentSize = maximumFragmentSize;
 		this.channelDownstreamHandlerFactories = channelDownstreamHandlerFactories;
 	}

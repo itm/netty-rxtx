@@ -20,9 +20,9 @@ import java.util.Map;
  *
  * // TODO implement time based window
  */
-public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
+public class RUPFragmentDecoder extends SimpleChannelHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(RUPPacketFragmentDecoder.class);
+	private static final Logger log = LoggerFactory.getLogger(RUPFragmentDecoder.class);
 
 	private static class PacketBuffer {
 
@@ -68,7 +68,7 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 			final ISensePacket iSensePacket = (ISensePacket) e.getMessage();
 
 			// only do something if the packet is a Remote UART packet, otherwise send it upstream
-			if (!RUPPacketHelper.isRemoteUARTPacket(iSensePacket)) {
+			if (!RUPHelper.isRemoteUARTPacket(iSensePacket)) {
 				ctx.sendUpstream(e);
 				return;
 			}
@@ -86,7 +86,7 @@ public class RUPPacketFragmentDecoder extends SimpleChannelHandler {
 			);
 		}
 
-		final RUPPacketFragment fragment = RUPPacketFragmentFactory.wrap(payload);
+		final RUPPacketFragment fragment = RUPFragmentFactory.wrap(payload);
 
 		final int sequenceNumber = fragment.getSequenceNumber();
 		final long source = fragment.getSource();

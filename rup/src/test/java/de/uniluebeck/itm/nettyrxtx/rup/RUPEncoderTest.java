@@ -14,14 +14,14 @@ import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
 
-public class RUPPacketEncoderTest {
+public class RUPEncoderTest {
 
 	private EncoderEmbedder<RUPPacketFragment> encoder;
 
 	@Before
 	public void setUp() {
 		encoder = new EncoderEmbedder<RUPPacketFragment>(
-				new RUPPacketEncoder(19 + 10 /* header + payload */, new DleStxEtxFramingEncoderFactory())
+				new RUPEncoder(19 + 10 /* header + payload */, new DleStxEtxFramingEncoderFactory())
 		);
 	}
 

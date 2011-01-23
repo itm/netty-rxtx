@@ -1,18 +1,15 @@
 package de.uniluebeck.itm.nettyrxtx.rup;
 
 
-import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxConstants;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.embedder.DecoderEmbedder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-
 import static org.junit.Assert.*;
 
-public class RUPPacketFragmentDecoderTest extends RUPDecoderTestBase {
+public class RUPFragmentDecoderTest extends RUPDecoderTestBase {
 
 	private DecoderEmbedder<RUPPacketFragment> decoder;
 
@@ -20,7 +17,7 @@ public class RUPPacketFragmentDecoderTest extends RUPDecoderTestBase {
 	public void setUp() {
 		super.setUp();
 		decoder = new DecoderEmbedder<RUPPacketFragment>(
-				new RUPPacketFragmentDecoder()
+				new RUPFragmentDecoder()
 		);
 	}
 

@@ -11,13 +11,13 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class RUPPacketFragmentEncoderTest {
+public class RUPFragmentEncoderTest {
 
 	private EncoderEmbedder<ISensePacket> encoder;
 
 	@Before
 	public void setUp() {
-		encoder = new EncoderEmbedder<ISensePacket>(new RUPPacketFragmentEncoder());
+		encoder = new EncoderEmbedder<ISensePacket>(new RUPFragmentEncoder());
 	}
 
 	@After
@@ -27,7 +27,7 @@ public class RUPPacketFragmentEncoderTest {
 
 	@Test
 	public void testSingleFragment() {
-		RUPPacketFragment fragment = RUPPacketFragmentFactory.create(
+		RUPPacketFragment fragment = RUPFragmentFactory.create(
 				RUPPacket.Type.MESSAGE,
 				(byte) 0,
 				0x1234,
@@ -54,14 +54,14 @@ public class RUPPacketFragmentEncoderTest {
 
 	@Test
 	public void testMultipleFragments() {
-		RUPPacketFragment fragment1 = RUPPacketFragmentFactory.create(
+		RUPPacketFragment fragment1 = RUPFragmentFactory.create(
 				RUPPacket.Type.MESSAGE,
 				(byte) 0,
 				0x1234,
 				0x4321,
 				new byte[]{1, 2, 3}
 		);
-		RUPPacketFragment fragment2 = RUPPacketFragmentFactory.create(
+		RUPPacketFragment fragment2 = RUPFragmentFactory.create(
 				RUPPacket.Type.MESSAGE,
 				(byte) 1,
 				0x2345,

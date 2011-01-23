@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
 
-public class RUPPacketHelper {
+public class RUPHelper {
 
 	/**
 	 * Checks if {@code type} is one of {@link RUPPacket.Type#MESSAGE}, {@link RUPPacket.Type#SINK_REQUEST}

@@ -29,7 +29,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 /**
  * A factory for creating or parsing remote UART packets.
  */
-public class RUPPacketFragmentFactory {
+public class RUPFragmentFactory {
 
 	/**
 	 * Creates a new {@link RUPPacketFragment} instance. Bytes will be copied from the source.
@@ -44,7 +44,7 @@ public class RUPPacketFragmentFactory {
 	 */
 	public static RUPPacketFragment create(RUPPacket.Type cmdType, byte sequenceNumber, long destination, long source,
 								   byte[] payload) {
-		return new RUPPacketFragmentImpl(cmdType.getValue(), sequenceNumber, destination, source, payload);
+		return new RUPFragmentImpl(cmdType.getValue(), sequenceNumber, destination, source, payload);
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class RUPPacketFragmentFactory {
 	 * @return the newly created {@link RUPPacketFragment} instance
 	 */
 	public static RUPPacketFragment create(byte cmdType, byte sequenceNumber, long destination, long source, byte[] payload) {
-		return new RUPPacketFragmentImpl(cmdType, sequenceNumber, destination, source, payload);
+		return new RUPFragmentImpl(cmdType, sequenceNumber, destination, source, payload);
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class RUPPacketFragmentFactory {
 	 * @return the newly created {@link RUPPacketFragment} instance
 	 */
 	public static RUPPacketFragment create(byte cmdType, byte sequenceNumber, long destination, long source, ChannelBuffer payload) {
-		return new RUPPacketFragmentImpl(cmdType, sequenceNumber, destination, source, payload);
+		return new RUPFragmentImpl(cmdType, sequenceNumber, destination, source, payload);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class RUPPacketFragmentFactory {
 	}
 
 	public static RUPPacketFragment wrap(ChannelBuffer channelBuffer) {
-		return new RUPPacketFragmentImpl(channelBuffer);
+		return new RUPFragmentImpl(channelBuffer);
 	}
 
 }

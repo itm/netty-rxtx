@@ -3,8 +3,6 @@ package de.uniluebeck.itm.nettyrxtx.rup;
 import com.google.common.collect.Maps;
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxConstants;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.junit.After;
-import org.junit.Before;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -32,25 +30,25 @@ public abstract class RUPDecoderTestBase {
 		bb.put(DleStxEtxConstants.DLE_STX);
 		bb.put(payload.getBytes());
 		bb.put(DleStxEtxConstants.DLE_ETX);
-		return RUPPacketFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
+		return RUPFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
 	}
 
 	protected ChannelBuffer createOpeningMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
 		ByteBuffer bb = ByteBuffer.allocate(2 + payload.getBytes().length);
 		bb.put(DleStxEtxConstants.DLE_STX);
 		bb.put(payload.getBytes());
-		return RUPPacketFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
+		return RUPFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
 	}
 
 	protected ChannelBuffer createMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
-		return RUPPacketFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, payload.getBytes()).getChannelBuffer();
+		return RUPFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, payload.getBytes()).getChannelBuffer();
 	}
 
 	protected ChannelBuffer createClosingMessageFragment(byte sequenceNumber, long destination, long source, String payload) {
 		ByteBuffer bb = ByteBuffer.allocate(2 + payload.getBytes().length);
 		bb.put(payload.getBytes());
 		bb.put(DleStxEtxConstants.DLE_ETX);
-		return RUPPacketFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
+		return RUPFragmentFactory.create(RUPPacket.Type.MESSAGE, sequenceNumber, destination, source, bb.array()).getChannelBuffer();
 	}
 
 	protected byte getRandomSequenceNumber(long sender) {

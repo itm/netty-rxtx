@@ -31,7 +31,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import java.util.Arrays;
 
 
-class RUPPacketFragmentImpl implements RUPPacketFragment {
+class RUPFragmentImpl implements RUPPacketFragment {
 
 	private static final int POS_CMD_TYPE = 0;
 
@@ -45,7 +45,7 @@ class RUPPacketFragmentImpl implements RUPPacketFragment {
 
 	private final ChannelBuffer packet;
 
-	public RUPPacketFragmentImpl(final ChannelBuffer channelBuffer) {
+	public RUPFragmentImpl(final ChannelBuffer channelBuffer) {
 
 		Preconditions.checkNotNull(channelBuffer);
 		Preconditions.checkArgument(
@@ -57,14 +57,14 @@ class RUPPacketFragmentImpl implements RUPPacketFragment {
 		packet = channelBuffer;
 	}
 
-	public RUPPacketFragmentImpl(final byte cmdType, final byte sequenceNumber, final long destination,
-								 final long source,
-								 final byte[] payload) {
+	public RUPFragmentImpl(final byte cmdType, final byte sequenceNumber, final long destination,
+						   final long source,
+						   final byte[] payload) {
 
 		this(cmdType, sequenceNumber, destination, source, ChannelBuffers.wrappedBuffer(payload));
 	}
 
-	public RUPPacketFragmentImpl(byte cmdType, byte sequenceNumber, long destination, long source, ChannelBuffer payload) {
+	public RUPFragmentImpl(byte cmdType, byte sequenceNumber, long destination, long source, ChannelBuffer payload) {
 
 		Preconditions.checkNotNull(cmdType, "cmdType is null");
 		Preconditions.checkNotNull(sequenceNumber, "sequenceNumber is null");
@@ -118,7 +118,7 @@ class RUPPacketFragmentImpl implements RUPPacketFragment {
 			return false;
 		}
 
-		final RUPPacketFragmentImpl that = (RUPPacketFragmentImpl) o;
+		final RUPFragmentImpl that = (RUPFragmentImpl) o;
 		return Arrays.equals(packet.array(), that.packet.array());
 
 	}

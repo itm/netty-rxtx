@@ -16,9 +16,9 @@ import java.util.Map;
  * payload. The result of the decoding is on {@link RUPPacketFragment} instance with a reassembled payload and the same
  * packet headers as the individual fragments (except of the sequenceNumber field).
  */
-public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
+public class RUPDecoder extends SimpleChannelUpstreamHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(RUPPacketDecoder.class);
+	private static final Logger log = LoggerFactory.getLogger(RUPDecoder.class);
 
 	private static class Reassembler {
 
@@ -72,7 +72,7 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 	private final Map<Long, Reassembler> reassemblersMap = Maps.newHashMap();
 
 	/**
-	 * Constructs a new RUPPacketDecoder instance that uses a {@link DecoderEmbedder} that wraps decoders created by the
+	 * Constructs a new RUPDecoder instance that uses a {@link DecoderEmbedder} that wraps decoders created by the
 	 * {@code channelUpstreamHandlerFactories} to reassemble a RUPPacketFragment (type {@link RUPPacket.Type#MESSAGE})
 	 * instance from a series of RUPPacketFragment fragments. For each RUP endpoint one {@link DecoderEmbedder} instance
 	 * that uses the decoders created by {@code channelUpstreamHandlers}.
@@ -80,7 +80,7 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 	 * @param channelUpstreamHandlerFactories
 	 *         the factories for creating handlers for reassembling the packet from a series of packet fragments
 	 */
-	public RUPPacketDecoder(final ChannelUpstreamHandlerFactory... channelUpstreamHandlerFactories) {
+	public RUPDecoder(final ChannelUpstreamHandlerFactory... channelUpstreamHandlerFactories) {
 		this.channelUpstreamHandlerFactories = channelUpstreamHandlerFactories;
 	}
 
