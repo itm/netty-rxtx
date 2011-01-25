@@ -29,6 +29,8 @@ import de.uniluebeck.itm.nettyrxtx.ChannelDownstreamHandlerFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.embedder.EncoderEmbedder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +39,14 @@ import java.util.Map;
 
 public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 
+	private static final Logger log = LoggerFactory.getLogger(RUPPacketEncoder.class);
+
 	private static class Fragmenter {
 
 		/**
 		 * An encoder chain that may e.g. wrap the payload of a packet to encode with e.g. DLE STX ... DLE ETX.
 		 */
-		private final EncoderEmbedder<ChannelBuffer> encoder;
+		private EncoderEmbedder<ChannelBuffer> encoder;
 
 		/**
 		 * The maximum size of a fragment payload (i.e. excluding headers).
@@ -57,7 +61,9 @@ public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 		public Fragmenter(final int maximumFragmentPayloadSize, final ChannelDownstreamHandler[] channelDownstreamHandlers) {
 
 			this.maximumFragmentPayloadSize = maximumFragmentPayloadSize;
-			this.encoder = new EncoderEmbedder<ChannelBuffer>(channelDownstreamHandlers);
+			if (channelDownstreamHandlers != null && channelDownstreamHandlers.length > 0) {
+				this.encoder = new EncoderEmbedder<ChannelBuffer>(channelDownstreamHandlers);
+			}
 		}
 
 		/**
@@ -68,9 +74,13 @@ public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 		 */
 		public List<RUPFragment> fragment(RUPPacket packet) {
 
-			encoder.offer(packet.getPayload());
-			final ChannelBuffer encodedPayload = encoder.poll();
-
+			final ChannelBuffer encodedPayload;
+			if (encoder != null) {
+				encoder.offer(packet.getPayload());
+				encodedPayload = encoder.poll();
+			} else {
+				encodedPayload = packet.getPayload();
+			}
 
 			int payloadBytesRemaining = encodedPayload.readableBytes();
 			int payloadBytesWritten = 0;
@@ -79,7 +89,8 @@ public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 
 			while (payloadBytesRemaining > 0) {
 
-				int bytesToWrite = payloadBytesRemaining < maximumFragmentPayloadSize ? payloadBytesRemaining : maximumFragmentPayloadSize;
+				int bytesToWrite = payloadBytesRemaining < maximumFragmentPayloadSize ? payloadBytesRemaining :
+						maximumFragmentPayloadSize;
 
 				fragments.add(RUPFragmentFactory.create(
 						packet.getCmdType(),
@@ -87,7 +98,8 @@ public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 						packet.getDestination(),
 						packet.getSource(),
 						encodedPayload.slice(payloadBytesWritten, bytesToWrite)
-				));
+				)
+				);
 
 				payloadBytesWritten += bytesToWrite;
 				payloadBytesRemaining -= bytesToWrite;
@@ -139,16 +151,36 @@ public class RUPPacketEncoder extends SimpleChannelDownstreamHandler {
 	@Override
 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 
-		RUPPacket packet = (RUPPacket) e.getMessage();
-
-		// only messages need fragmentation, set sink, sink requests and sink responses don't
-		if (packet.getCmdType() != RUPPacket.Type.MESSAGE.getValue()) {
+		if (!(e.getMessage() instanceof RUPPacket)) {
 			ctx.sendDownstream(e);
 			return;
 		}
 
+
+		RUPPacket packet = (RUPPacket) e.getMessage();
+		log.trace("[{}] Encoding into fragments: {}", ctx.getName(), packet);
+
+		// only messages need fragmentation, set sink, sink requests and sink responses don't
+		if (packet.getCmdType() != RUPPacket.Type.MESSAGE.getValue()) {
+			RUPFragment fragment = RUPFragmentFactory.create(
+					packet.getCmdType(),
+					(byte) 0,
+					packet.getDestination(),
+					packet.getSource(),
+					packet.getPayload()
+			);
+			log.trace("[{}] Sending non-MESSAGE type RUP packet downstream", ctx.getName(), packet);
+			ctx.sendDownstream(
+					new DownstreamMessageEvent(ctx.getChannel(), e.getFuture(), fragment, e.getRemoteAddress())
+			);
+			return;
+		}
+
 		for (RUPFragment fragment : getFragmenter(packet).fragment(packet)) {
-			ctx.sendDownstream(new DownstreamMessageEvent(ctx.getChannel(), e.getFuture(), fragment, e.getRemoteAddress()));
+			log.trace("[{}] Sending fragment downstream: {}", ctx.getName(), fragment);
+			ctx.sendDownstream(
+					new DownstreamMessageEvent(ctx.getChannel(), e.getFuture(), fragment, e.getRemoteAddress())
+			);
 		}
 
 	}

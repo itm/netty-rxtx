@@ -29,7 +29,7 @@ import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.channel.UpstreamMessageEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ import java.util.Map;
  *
  * // TODO implement time based window
  */
-public class RUPFragmentDecoder extends SimpleChannelHandler {
+public class RUPFragmentDecoder extends SimpleChannelUpstreamHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(RUPFragmentDecoder.class);
 
@@ -104,9 +104,8 @@ public class RUPFragmentDecoder extends SimpleChannelHandler {
 
 		} else {
 
-			throw new IllegalArgumentException(
-					"This decoder only encodes from either a ChannelBuffer or an ISensePacket"
-			);
+			ctx.sendUpstream(e);
+			return;
 		}
 
 		final RUPFragment fragment = RUPFragmentFactory.wrap(payload);

@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.TooManyListenersException;
 import java.util.concurrent.Executor;
 
@@ -46,9 +45,10 @@ public class RXTXChannelSink extends AbstractChannelSink {
 
 		private final RXTXChannelSink channelSink;
 
-		private final Object message;
+		private final ChannelBuffer message;
 
-		public WriteRunnable(final DefaultChannelFuture future, final RXTXChannelSink channelSink, final Object message) {
+		public WriteRunnable(final DefaultChannelFuture future, final RXTXChannelSink channelSink,
+							 final ChannelBuffer message) {
 			this.future = future;
 			this.channelSink = channelSink;
 			this.message = message;
@@ -57,9 +57,11 @@ public class RXTXChannelSink extends AbstractChannelSink {
 		public void run() {
 			try {
 
-				ByteBuffer buffer = (ByteBuffer) message;
-				channelSink.outputStream.write(buffer.array());
+				channelSink.outputStream.write(message.array(), message.readerIndex(), message.readableBytes());
 				channelSink.outputStream.flush();
+				if (log.isTraceEnabled()) {
+					log.trace("Wrote message to outputStream: {}", StringUtils.toHexString(message));
+				}
 				future.setSuccess();
 
 			} catch (Exception e) {
@@ -100,10 +102,22 @@ public class RXTXChannelSink extends AbstractChannelSink {
 				throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException, IOException,
 				TooManyListenersException {
 
-			final CommPortIdentifier cpi = CommPortIdentifier.getPortIdentifier(channelSink.remoteAddress.getDeviceAddress());
-			final CommPort commPort = cpi.open(this.getClass().getName(), 1000);
+			final CommPort commPort;
+			try {
 
-			Runtime.getRuntime().addShutdownHook(new Thread(){
+				final CommPortIdentifier cpi =
+						CommPortIdentifier.getPortIdentifier(channelSink.remoteAddress.getDeviceAddress());
+				commPort = cpi.open(this.getClass().getName(), 1000);
+
+			} catch (NoSuchPortException e) {
+				log.warn("No such port {}: {}", channelSink.remoteAddress.getDeviceAddress(), e.getMessage());
+				throw e;
+			} catch (PortInUseException e) {
+				log.warn("Port {} in use: {}", channelSink.remoteAddress.getDeviceAddress(), e.getMessage());
+				throw e;
+			}
+
+			Runtime.getRuntime().addShutdownHook(new Thread() {
 				@Override
 				public void run() {
 					try {
@@ -112,7 +126,8 @@ public class RXTXChannelSink extends AbstractChannelSink {
 						log.warn("" + e, e);
 					}
 				}
-			});
+			}
+			);
 
 			channelSink.serialPort = ((SerialPort) commPort);
 			log.debug("Adding SerialPortEventListener");
@@ -255,6 +270,7 @@ public class RXTXChannelSink extends AbstractChannelSink {
 										channelBuffer,
 										channelSink.getRemoteAddress()
 								);
+								log.trace("read from stream: {}", StringUtils.toHexString(channelBuffer));
 								channelSink.channel.getPipeline().sendUpstream(upstreamMessageEvent);
 							}
 						}
@@ -283,40 +299,49 @@ public class RXTXChannelSink extends AbstractChannelSink {
 
 		if (e instanceof ChannelStateEvent) {
 
-            final ChannelStateEvent stateEvent = (ChannelStateEvent) e;
-            final ChannelState state = stateEvent.getState();
-            final Object value = stateEvent.getValue();
+			final ChannelStateEvent stateEvent = (ChannelStateEvent) e;
+			final ChannelState state = stateEvent.getState();
+			final Object value = stateEvent.getValue();
 
-            switch (state) {
+			switch (state) {
 
-            case OPEN:
-                if (Boolean.FALSE.equals(value)) {
-					executor.execute(new DisconnectRunnable((DefaultChannelFuture) future, this));
-                }
-                break;
+				case OPEN:
+					if (Boolean.FALSE.equals(value)) {
+						executor.execute(new DisconnectRunnable((DefaultChannelFuture) future, this));
+					}
+					break;
 
-            case BOUND:
-				throw new UnsupportedOperationException();
+				case BOUND:
+					throw new UnsupportedOperationException();
 
-            case CONNECTED:
-                if (value != null) {
-					remoteAddress = (RXTXDeviceAddress) value;
-					executor.execute(new ConnectRunnable((DefaultChannelFuture) future, this));
-                } else {
-                    executor.execute(new DisconnectRunnable((DefaultChannelFuture) future, this));
-                }
-                break;
+				case CONNECTED:
+					if (value != null) {
+						remoteAddress = (RXTXDeviceAddress) value;
+						executor.execute(new ConnectRunnable((DefaultChannelFuture) future, this));
+					} else {
+						executor.execute(new DisconnectRunnable((DefaultChannelFuture) future, this));
+					}
+					break;
 
-            case INTEREST_OPS:
-                throw new UnsupportedOperationException();
+				case INTEREST_OPS:
+					throw new UnsupportedOperationException();
 
-            }
+			}
 
-        } else if (e instanceof MessageEvent) {
+		} else if (e instanceof MessageEvent) {
 
-            final MessageEvent event = (MessageEvent) e;
-			executor.execute(new WriteRunnable((DefaultChannelFuture) future, this, event.getMessage()));
-        }
+			final MessageEvent event = (MessageEvent) e;
+			if (event.getMessage() instanceof ChannelBuffer) {
+				executor.execute(
+						new WriteRunnable((DefaultChannelFuture) future, this, (ChannelBuffer) event.getMessage())
+				);
+			} else {
+				throw new IllegalArgumentException(
+						"Only ChannelBuffer objects are supported to be written onto the RXTXChannelSink! "
+								+ "Please check if the encoder pipeline is configured correctly."
+				);
+			}
+		}
 	}
 
 }

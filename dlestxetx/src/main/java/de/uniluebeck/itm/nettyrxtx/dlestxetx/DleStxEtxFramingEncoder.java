@@ -24,27 +24,42 @@
 package de.uniluebeck.itm.nettyrxtx.dlestxetx;
 
 
+import de.uniluebeck.itm.nettyrxtx.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DleStxEtxFramingEncoder extends OneToOneEncoder {
+
+	private static final Logger log = LoggerFactory.getLogger(DleStxEtxFramingEncoder.class);
 
 	@Override
 	protected Object encode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
 
+		if (!(msg instanceof ChannelBuffer)) {
+			return msg;
+		}
+
 		ChannelBuffer buffer = (ChannelBuffer) msg;
-		ChannelBuffer packet = ChannelBuffers.dynamicBuffer(buffer.readableBytes()+4);
+		ChannelBuffer packet = ChannelBuffers.dynamicBuffer(buffer.readableBytes() + 4);
 		packet.writeBytes(DleStxEtxConstants.DLE_STX);
-		for (byte b : buffer.array()) {
+		for (int i = buffer.readerIndex(); i < (buffer.readerIndex() + buffer.readableBytes()); i++) {
+			byte b = buffer.getByte(i);
 			if (b == DleStxEtxConstants.DLE) {
 				packet.writeByte(DleStxEtxConstants.DLE);
 			}
 			packet.writeByte(b);
 		}
 		packet.writeBytes(DleStxEtxConstants.DLE_ETX);
+
+		if (log.isTraceEnabled()) {
+			log.trace("[{}] Encoded buffer: {}", ctx.getName(), StringUtils.toHexString(packet));
+		}
+
 		return packet;
 	}
 }

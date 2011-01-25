@@ -27,13 +27,23 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ISensePacketEncoder extends OneToOneEncoder {
 
+	private static final Logger log = LoggerFactory.getLogger(ISensePacketEncoder.class);
+
 	@Override
 	protected Object encode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
+
+		if (!(msg instanceof ISensePacket)) {
+			return msg;
+		}
+
 		ISensePacket packet = (ISensePacket) msg;
+		log.trace("[{}] Encoded ISensePacket: {}", ctx.getName(), packet);
 		return packet.getBuffer();
 	}
 }

@@ -34,6 +34,11 @@ public class RUPFragmentEncoder extends OneToOneEncoder {
 
 	@Override
 	protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
+
+		if (!(msg instanceof RUPFragment)) {
+			return msg;
+		}
+
 		RUPFragment fragment = (RUPFragment) msg;
 		return new ISensePacket(ISensePacketType.PLOT, fragment.getChannelBuffer());
 	}

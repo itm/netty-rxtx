@@ -110,6 +110,11 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 	@Override
 	public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
 
+		if (!(e.getMessage() instanceof RUPFragment)) {
+			ctx.sendUpstream(e);
+			return;
+		}
+
 		RUPFragment fragment = (RUPFragment) e.getMessage();
 
 		// only reassembly RUP message packets, other types don't need reassembly

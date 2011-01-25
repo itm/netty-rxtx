@@ -52,7 +52,7 @@ public class RXTXChannel extends AbstractChannel {
 	}
 
 	public SocketAddress getLocalAddress() {
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	public SocketAddress getRemoteAddress() {

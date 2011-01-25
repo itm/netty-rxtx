@@ -79,7 +79,7 @@ public class Main {
 					}
 				});
 
-				pipeline.addLast("RUPPacketEncoder", new RUPPacketEncoder(80, new DleStxEtxFramingEncoderFactory()));
+				pipeline.addLast("RUPPacketEncoder", new RUPPacketEncoder(80/*, new DleStxEtxFramingEncoderFactory()*/));
 				pipeline.addLast("RUPFragmentEncoder", new RUPFragmentEncoder());
 				pipeline.addLast("ISensePacketEncoder", new ISensePacketEncoder());
 				pipeline.addLast("FramingEncoder", new DleStxEtxFramingEncoder());

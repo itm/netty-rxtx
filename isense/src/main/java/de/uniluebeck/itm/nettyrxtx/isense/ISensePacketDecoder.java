@@ -38,6 +38,10 @@ public class ISensePacketDecoder extends OneToOneDecoder {
 	@Override
 	protected Object decode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
 
+		if (!(msg instanceof ChannelBuffer)) {
+			return msg;
+		}
+
 		ChannelBuffer buffer = (ChannelBuffer) msg;
 		ISensePacket iSensePacket = new ISensePacket(buffer);
 		log.trace("[{}] Decoded ISensePacket: {}", ctx.getName(), iSensePacket);
