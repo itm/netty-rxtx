@@ -40,6 +40,6 @@ public class RUPFragmentEncoder extends OneToOneEncoder {
 		}
 
 		RUPFragment fragment = (RUPFragment) msg;
-		return new ISensePacket(ISensePacketType.PLOT, fragment.getChannelBuffer());
+		return new ISensePacket(ISensePacketType.CUSTOM_IN_1, fragment.getChannelBuffer());
 	}
 }

@@ -63,7 +63,7 @@ public class RUPFragmentEncoderTest {
 	}
 
 	private void assertBufferCorrect(byte cmdType, byte sequenceNumber, long destination, long source, byte[] payload, ISensePacket iSensePacket) {
-		assertEquals(ISensePacketType.PLOT.getValue(), iSensePacket.getType());
+		assertEquals(ISensePacketType.CUSTOM_IN_1.getValue(), iSensePacket.getType());
 		ChannelBuffer encodedPayload = iSensePacket.getPayload();
 		assertEquals(cmdType, encodedPayload.getByte(0));
 		assertEquals(sequenceNumber, encodedPayload.getByte(1));

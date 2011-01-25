@@ -128,7 +128,11 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 
 		for (RUPPacket reassembledPacket : reassembledPackets) {
 			log.trace("[{}] Sending decoded RUPPacket upstream: {}", ctx.getName(), reassembledPacket);
-			Channels.fireMessageReceived(ctx, reassembledPacket);
+			ctx.sendUpstream(new UpstreamMessageEvent(
+					ctx.getChannel(),
+					reassembledPacket,
+					ctx.getChannel().getRemoteAddress()
+			));
 		}
 
 	}
