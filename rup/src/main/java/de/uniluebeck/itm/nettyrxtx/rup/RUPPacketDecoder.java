@@ -119,7 +119,16 @@ public class RUPPacketDecoder extends SimpleChannelUpstreamHandler {
 
 		// only reassembly RUP message packets, other types don't need reassembly
 		if (RUPPacket.Type.MESSAGE.getValue() != fragment.getCmdType()) {
-			ctx.sendUpstream(e);
+			ctx.sendUpstream(new UpstreamMessageEvent(
+					ctx.getChannel(),
+					new RUPPacketImpl(
+							fragment.getCmdType(),
+							fragment.getDestination(),
+							fragment.getSource(),
+							fragment.getPayload()
+					),
+					ctx.getChannel().getRemoteAddress()
+			));
 			return;
 		}
 

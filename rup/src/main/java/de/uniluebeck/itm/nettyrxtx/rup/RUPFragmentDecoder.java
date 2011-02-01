@@ -24,38 +24,46 @@
 package de.uniluebeck.itm.nettyrxtx.rup;
 
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
+import de.uniluebeck.itm.tr.util.TimeDiff;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.channel.UpstreamMessageEvent;
+import org.jboss.netty.channel.*;
+import org.jboss.netty.util.internal.ExecutorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Decoder for the Remote UART Protocol (RUP) that can decode RUP packet fragments out of either a ChannelBuffer or an
  * ISensePacket. Also, this decoder makes sure the packet order is correct according to the sequence number for a given
  * window of number of packets and/or time.
- *
+ * <p/>
  * // TODO implement time based window
  */
 public class RUPFragmentDecoder extends SimpleChannelUpstreamHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(RUPFragmentDecoder.class);
 
+	private static final long TIMEWINDOW = 500;
+
 	private static class PacketBuffer {
 
-		private Map<Integer, RUPPacket> packets = Maps.newTreeMap();
+		private Map<Integer, RUPFragment> packets = Maps.newTreeMap();
 
 		private int windowSize = 10;
 
 		private int windowOffset = 0;
 
 		public boolean veryFirstPacket = true;
+
+		private TimeDiff timeWindow = new TimeDiff(TIMEWINDOW);
 
 		/**
 		 * Checks if a sequenceNumber is inside the acceptance window.
@@ -76,9 +84,17 @@ public class RUPFragmentDecoder extends SimpleChannelUpstreamHandler {
 			// check if sequenceNumber lies in between the non-overlapping window
 			return sequenceNumber >= windowOffset && sequenceNumber < (windowOffset + windowSize);
 		}
+
 	}
 
+	private ScheduledExecutorService scheduler;
+
 	private Map<Long, PacketBuffer> packetBuffers = Maps.newHashMap();
+
+	public RUPFragmentDecoder(final ScheduledExecutorService scheduler) {
+		Preconditions.checkNotNull(scheduler);
+		this.scheduler = scheduler;
+	}
 
 	@Override
 	public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
@@ -126,7 +142,9 @@ public class RUPFragmentDecoder extends SimpleChannelUpstreamHandler {
 		}
 
 		// only accept packets that are within window bounds
-		if (packetBuffer.isInWindow(sequenceNumber)) {
+		if (packetBuffer.isInWindow(sequenceNumber) || packetBuffer.timeWindow.isTimeout()) {
+
+			packetBuffer.timeWindow.touch();
 
 			if (log.isTraceEnabled()) {
 				log.trace(
@@ -140,6 +158,13 @@ public class RUPFragmentDecoder extends SimpleChannelUpstreamHandler {
 			}
 
 			packetBuffer.packets.put(sequenceNumber, fragment);
+			final PacketBuffer finalPacketBuffer = packetBuffer;
+			scheduler.schedule(new Runnable() {
+				public void run() {
+					sendUpstreamWindowTimeout(finalPacketBuffer, ctx);
+				}
+			}, TIMEWINDOW, TimeUnit.MILLISECONDS
+			);
 			sendUpstreamIfBuffered(packetBuffer, ctx);
 
 		}
@@ -159,32 +184,39 @@ public class RUPFragmentDecoder extends SimpleChannelUpstreamHandler {
 
 	}
 
+	private void sendUpstreamWindowTimeout(final PacketBuffer packetBuffer, final ChannelHandlerContext ctx) {
+		for (RUPFragment packet : packetBuffer.packets.values()) {
+			sendUpstream(packetBuffer, packet, ctx);
+		}
+	}
+
+	private void sendUpstream(final PacketBuffer packetBuffer, final RUPFragment packetFragment,
+							  final ChannelHandlerContext ctx) {
+
+		// send packet upstream
+		if (log.isTraceEnabled()) {
+			log.trace("[{}] Sending packet upstream: {}", ctx.getName(), packetFragment);
+		}
+
+		ctx.sendUpstream(new UpstreamMessageEvent(
+				ctx.getChannel(),
+				packetFragment,
+				ctx.getChannel().getRemoteAddress()
+		)
+		);
+
+		packetBuffer.windowOffset = (packetFragment.getSequenceNumber() + 1) % 255;
+	}
+
 	private void sendUpstreamIfBuffered(final PacketBuffer packetBuffer, final ChannelHandlerContext ctx) {
 
 		// if there's no packet at currents offset it might mean we should possibly wait for it to arrive before sending
 		// packages upstream
 		int currentOffset = packetBuffer.windowOffset;
 		while (packetBuffer.packets.containsKey(currentOffset)) {
-
-			RUPPacket rupPacketFragment = packetBuffer.packets.remove(currentOffset);
-
-			// send packet upstream
-			if (log.isTraceEnabled()) {
-				log.trace("[{}] Sending packet upstream: {}", ctx.getName(), rupPacketFragment);
-			}
-			ctx.sendUpstream(
-					new UpstreamMessageEvent(ctx.getChannel(), rupPacketFragment,
-							ctx.getChannel().getRemoteAddress()
-					)
-			);
-
-
-			// move windowOffset
-			packetBuffer.windowOffset = (++packetBuffer.windowOffset) % 255;
+			sendUpstream(packetBuffer, packetBuffer.packets.remove(currentOffset), ctx);
 			currentOffset = packetBuffer.windowOffset;
-
 		}
 	}
-
 
 }

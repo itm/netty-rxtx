@@ -37,6 +37,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.util.CharsetUtil;
+import org.jboss.netty.util.internal.ExecutorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class Main {
 
@@ -54,6 +56,7 @@ public class Main {
 
 		String deviceAddress = args[0];
 
+		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 		ExecutorService executor = Executors.newCachedThreadPool();
 		ClientBootstrap bootstrap = new ClientBootstrap(new RXTXChannelFactory(executor));
 
@@ -61,10 +64,10 @@ public class Main {
 		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 			public ChannelPipeline getPipeline() throws Exception {
 				DefaultChannelPipeline pipeline = new DefaultChannelPipeline();
-
 				pipeline.addLast("FramingDecoder", new DleStxEtxFramingDecoder());
 				pipeline.addLast("ISensePacketDecoder", new ISensePacketDecoder());
-				pipeline.addLast("RUPFragmentDecoder", new RUPFragmentDecoder());
+
+				pipeline.addLast("RUPFragmentDecoder", new RUPFragmentDecoder(scheduler));
 				pipeline.addLast("RUPPacketDecoder", new RUPPacketDecoder(new DleStxEtxFramingDecoderFactory()));
 				pipeline.addLast("StringDecoder", new StringDecoder(CharsetUtil.UTF_8));
 
@@ -113,6 +116,8 @@ public class Main {
 
 		// Shut down all thread pools to exit.
 		bootstrap.releaseExternalResources();
+
+		ExecutorUtil.terminate(scheduler);
 	}
 
 }

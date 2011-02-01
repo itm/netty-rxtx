@@ -26,27 +26,35 @@ package de.uniluebeck.itm.nettyrxtx.rup;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.embedder.DecoderEmbedder;
+import org.jboss.netty.util.internal.ExecutorUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 import static org.junit.Assert.*;
 
-public class RUPFragmentPacketDecoderTest extends RUPPacketDecoderTestBase {
+public class RUPFragmentDecoderTest extends RUPPacketDecoderTestBase {
 
 	private DecoderEmbedder<RUPFragment> decoder;
+
+	private ScheduledExecutorService scheduler;
 
 	@Before
 	public void setUp() {
 		super.setUp();
+		scheduler = Executors.newScheduledThreadPool(1);
 		decoder = new DecoderEmbedder<RUPFragment>(
-				new RUPFragmentDecoder()
+				new RUPFragmentDecoder(scheduler)
 		);
 	}
 
 	@After
 	public void tearDown() {
 		decoder = null;
+		ExecutorUtil.terminate(scheduler);
 		super.tearDown();
 	}
 
@@ -151,6 +159,8 @@ public class RUPFragmentPacketDecoderTest extends RUPPacketDecoderTestBase {
 		assertPacketCorrect(sequenceNumber3, 0x1234, 0x4321, "world, hello", decodedFragment3);
 
 	}
+
+
 
 	/**
 	 * Tests if a packet with an empty payload is successfully decoded.

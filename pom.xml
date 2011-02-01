@@ -60,6 +60,11 @@
 				<version>r07</version>
 			</dependency>
 			<dependency>
+				<groupId>de.uniluebeck.itm</groupId>
+				<artifactId>tr.util</artifactId>
+				<version>0.5.5</version>
+			</dependency>
+			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.8.2</version>

@@ -25,9 +25,13 @@ package de.uniluebeck.itm.nettyrxtx.rup;
 
 import de.uniluebeck.itm.nettyrxtx.dlestxetx.DleStxEtxFramingDecoderFactory;
 import org.jboss.netty.handler.codec.embedder.DecoderEmbedder;
+import org.jboss.netty.util.internal.ExecutorUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.junit.Assert.*;
 
@@ -36,17 +40,21 @@ public class RUPPacketDecoderTest extends RUPPacketDecoderTestBase {
 
 	private DecoderEmbedder<RUPPacket> decoder;
 
+	private ScheduledExecutorService scheduler;
+
 	@Before
 	public void setUp() {
 		super.setUp();
+		scheduler = Executors.newScheduledThreadPool(1);
 		decoder = new DecoderEmbedder<RUPPacket>(
-				new RUPFragmentDecoder(),
+				new RUPFragmentDecoder(scheduler),
 				new RUPPacketDecoder(new DleStxEtxFramingDecoderFactory())
 		);
 	}
 
 	@After
 	public void tearDown() {
+		ExecutorUtil.terminate(scheduler);
 		decoder = null;
 		super.tearDown();
 	}
