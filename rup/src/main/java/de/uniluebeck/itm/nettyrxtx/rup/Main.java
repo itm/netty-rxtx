@@ -69,16 +69,13 @@ public class Main {
 
 				pipeline.addLast("RUPFragmentDecoder", new RUPFragmentDecoder(scheduler));
 				pipeline.addLast("RUPPacketDecoder", new RUPPacketDecoder(new DleStxEtxFramingDecoderFactory()));
-				pipeline.addLast("StringDecoder", new StringDecoder(CharsetUtil.UTF_8));
 
 				pipeline.addLast("LoggingHandler", new SimpleChannelHandler() {
 					@Override
 					public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e)
 							throws Exception {
 						ChannelBuffer payload = ((RUPPacket) e.getMessage()).getPayload();
-						byte[] payloadBytes = new byte[payload.readableBytes()];
-						payload.readBytes(payloadBytes);
-						log.info("{}", new String(payloadBytes));
+						log.info("{}", payload.toString(CharsetUtil.UTF_8));
 					}
 				});
 
