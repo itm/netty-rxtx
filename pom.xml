@@ -15,7 +15,8 @@
 		<module>dlestxetx</module>
 		<module>isense</module>
 		<module>rup</module>
-	</modules>
+        <module>node-api</module>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>
