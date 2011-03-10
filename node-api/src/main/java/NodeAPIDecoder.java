@@ -1,3 +1,4 @@
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -19,12 +20,12 @@ public class NodeAPIDecoder extends OneToOneDecoder {
 
 	@Override
 	protected Object decode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
-		if (!(msg instanceof ChannelBuffer)) {
+		if (!(msg instanceof ISensePacket)) {
 			return msg;
 		}
 
-		ResponsePacket packet = (ResponsePacket) msg;
+		ISensePacket packet = (ISensePacket) msg;
 		log.trace("[{}] Decoded NodeAPIPacket: {}", ctx.getName(), packet);
-		return packet.getBuffer();
+		return new ResponsePacket(packet);
 	}
 }

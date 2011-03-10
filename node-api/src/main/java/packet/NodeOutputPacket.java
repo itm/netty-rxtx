@@ -1,5 +1,7 @@
 package packet;
 
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
@@ -12,28 +14,26 @@ import org.jboss.netty.buffer.ChannelBuffers;
  */
 public class NodeOutputPacket extends NodeAPIPacket {
 
-	//Constructors
-	public NodeOutputPacket(ChannelBuffer buffer){
-		super(buffer);
-	}
-
-	public NodeOutputPacket(final byte command_type, final ChannelBuffer payload){
-		super(ChannelBuffers.wrappedBuffer(
-				ChannelBuffers.wrappedBuffer(new byte[]{command_type}),
-				payload));
-	}
-
-	public NodeOutputPacket(final NodeAPIPacketType command_type, final ChannelBuffer payload){
-		this(command_type.getValue(), payload);
-	}
-
+	/*public NodeOutputPacket(ISensePacket iSensePacket){
+		super(iSensePacket);
+	}*/
 	
+	public NodeOutputPacket(byte command_type, ChannelBuffer payload){
+		//TODO check if constructor with ISensePacketType.NETWORK_IN is correct?
+		super(new ISensePacket(ISensePacketType.NETWORK_IN,
+				ChannelBuffers.wrappedBuffer(
+						ChannelBuffers.wrappedBuffer(new byte[]{command_type}),
+						payload
+				)
+			));
+	}
+
 	public byte getCommandType(){
 		return super.getCommandType();
 	}
 
 	public ChannelBuffer getPayload(){
-		return super.buffer.slice(1, this.buffer.readableBytes() - 1);
+		return buffer.slice(1, buffer.readableBytes() - 1);
 	}
 
 }

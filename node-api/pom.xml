@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>node-api</artifactId>
+    <name>Netty RXTX :: Node API Decoder/Encoder</name>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

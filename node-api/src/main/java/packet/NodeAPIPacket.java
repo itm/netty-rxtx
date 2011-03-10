@@ -1,5 +1,7 @@
 package packet;
 
+import de.uniluebeck.itm.nettyrxtx.StringUtils;
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
@@ -11,40 +13,35 @@ import org.jboss.netty.buffer.ChannelBuffer;
  */
 public abstract class NodeAPIPacket {
 
+	protected final ISensePacket iSensePacket;
 	protected final ChannelBuffer buffer;
 
-	protected NodeAPIPacket(ChannelBuffer buffer) {
-		this.buffer = buffer;
+	protected NodeAPIPacket(ISensePacket iSensePacket) {
+		this.iSensePacket = iSensePacket;
+		this.buffer = iSensePacket.getPayload();
 	}
 
 	//getters
 
 	public abstract ChannelBuffer getPayload();
 
-	protected byte getCommandType(){
-		return getCommandType(this.buffer);
+	public byte getCommandType(){
+		return this.buffer.getByte(0);
 	}
 
-	protected byte getRequestId(){
-		return this.buffer.getByte(1);
+	public ISensePacket getISensePacket() {
+		return this.iSensePacket;
 	}
 
-	protected byte getResult(){
-		return this.buffer.getByte(2);
+	//String toString()
+	public String toString(){
+		NodeAPIPacketType packetType = NodeAPIPacketType.fromValue(getCommandType());
+		StringBuilder builder = new StringBuilder();
+		builder.append(this.getClass().getSimpleName() + "[type=");
+		builder.append(packetType == null ? getCommandType() : packetType);
+		builder.append(",payload=");
+		builder.append(StringUtils.toHexString(getPayload()));
+		builder.append("]");
+		return builder.toString();
 	}
-
-	public ChannelBuffer getBuffer() {
-		return buffer;
-	}
-
-
-	//static methods
-	
-	public static NodeAPIPacketType getPacketType(ChannelBuffer buffer){
-		return NodeAPIPacketType.fromValue(getCommandType(buffer));
-	}
-
-	private static byte getCommandType(ChannelBuffer buffer){
-		return buffer.getByte(0);
-	}	
 }

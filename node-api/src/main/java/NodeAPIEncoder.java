@@ -1,13 +1,10 @@
-import org.jboss.netty.buffer.ChannelBuffer;
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import packet.*;
-
-import static packet.NodeAPIPacketType.DEBUG_MESSAGE;
-import static packet.NodeAPIPacketType.NODE_OUTPUT_TEXT;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,19 +24,10 @@ public class NodeAPIEncoder extends OneToOneEncoder {
 			return msg;
 		}
 
-		ChannelBuffer buffer = (ChannelBuffer) msg;
-		NodeAPIPacketType packetType = NodeAPIPacket.getPacketType(buffer);
-		NodeAPIPacket nodeAPIPacket = null;
+		NodeAPIPacket nodeAPIInputPacket = (NodeAPIPacket) msg;
 
-		//find out type of message
-		if (packetType.isNodeOutputPacket()) {
-			nodeAPIPacket = new NodeOutputPacket(buffer);
-		} else {
-			nodeAPIPacket = new CommandPacket(buffer);
-		}
-
-		log.trace("[{}] Encoded NodeAPIPacket: {}", ctx.getName(), nodeAPIPacket);
-		return nodeAPIPacket;
+		log.trace("[{}] Encoded NodeAPIPacket: {}", ctx.getName(), nodeAPIInputPacket);
+		return nodeAPIInputPacket.getISensePacket();
 
 	}
 }

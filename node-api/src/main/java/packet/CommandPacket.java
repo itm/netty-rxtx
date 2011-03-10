@@ -1,7 +1,11 @@
 package packet;
 
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+
+import java.nio.channels.Channel;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,33 +16,32 @@ import org.jboss.netty.buffer.ChannelBuffers;
  */
 public class CommandPacket extends NodeAPIPacket {
 
-	//Constructors
-	public CommandPacket(ChannelBuffer buffer){
-		super(buffer);
-	}
+	//Constructor
+	/*public CommandPacket(ISensePacket iSensePacket){
+		super(iSensePacket);
+	}*/
 
-	public CommandPacket(final byte command_type, final byte request_id, final ChannelBuffer payload){
-		this(ChannelBuffers.wrappedBuffer(
-				ChannelBuffers.wrappedBuffer(new byte[]{command_type}),
-				ChannelBuffers.wrappedBuffer(new byte[]{request_id}),
-				payload));
+	public CommandPacket(byte command_type, byte request_id, ChannelBuffer payload){
+		//TODO check if constructor with ISensePacketType.NETWORK_IN is correct?
+		super(new ISensePacket(ISensePacketType.NETWORK_IN,
+				ChannelBuffers.wrappedBuffer(
+					ChannelBuffers.wrappedBuffer(new byte[]{command_type}),
+					ChannelBuffers.wrappedBuffer(new byte[]{request_id}),
+					payload
+				)
+			));
 	}
-
-	public CommandPacket(final NodeAPIPacketType command_type, final byte request_id, final ChannelBuffer payload){
-		this(command_type.getValue(), request_id, payload);
-	}
-
 
 	public byte getCommandType(){
 		return super.getCommandType();
 	}
 
 	public byte getRequestId(){
-		return super.getRequestId();
+		return buffer.getByte(1);
 	}
 
 	public ChannelBuffer getPayload(){
-		return super.buffer.slice(2, this.buffer.readableBytes() - 2);
+		return buffer.slice(2, buffer.readableBytes() - 2);
 	}
 
 
