@@ -1,4 +1,4 @@
-/**********************************************************************************************************************
+package de.uniluebeck.itm.nettyrxtx.nodeapi; /**********************************************************************************************************************
  * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
  * All rights reserved.                                                                                               *
  *                                                                                                                    *
@@ -21,39 +21,30 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
  **********************************************************************************************************************/
 
-package packet;
-
-import de.uniluebeck.itm.nettyrxtx.StringUtils;
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
-import org.jboss.netty.buffer.ChannelBuffer;
+import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
+import de.uniluebeck.itm.nettyrxtx.nodeapi.packet.NodeAPIPacket;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class NodeAPIPacket {
+public class NodeAPIEncoder extends OneToOneEncoder {
 
-	protected final ChannelBuffer buffer;
+	private static final Logger log = LoggerFactory.getLogger(NodeAPIEncoder.class);
 
-	protected NodeAPIPacket(ChannelBuffer buffer) {
-		this.buffer = buffer;
-	}
+	@Override
+	protected Object encode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
 
-	//getters
-	public abstract ChannelBuffer getPayload();
+		if (!(msg instanceof NodeAPIPacket)) {
+			return msg;
+		}
 
-	public byte getCommandType(){
-		return getBuffer().getByte(0);
-	}
+		NodeAPIPacket nodeAPIInputPacket = (NodeAPIPacket) msg;
 
-	public ChannelBuffer getBuffer(){
-		return buffer;
-	}
-	//String toString()
-	public String toString(){
-		NodeAPIPacketType packetType = NodeAPIPacketType.fromValue(getCommandType());
-		StringBuilder builder = new StringBuilder();
-		builder.append(this.getClass().getSimpleName()).append("[type=");
-		builder.append(packetType == null ? getCommandType() : packetType);
-		builder.append(",payload=");
-		builder.append(StringUtils.toHexString(getPayload()));
-		builder.append("]");
-		return builder.toString();
+		log.trace("[{}] Encoded NodeAPIPacket: {}", ctx.getName(), nodeAPIInputPacket);
+		//TODO: is NETWORK_IN correct?
+		return new ISensePacket(ISensePacketType.NETWORK_IN, nodeAPIInputPacket.getBuffer());
 	}
 }

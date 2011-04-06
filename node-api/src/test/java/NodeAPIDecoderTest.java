@@ -23,11 +23,12 @@
 
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
+import de.uniluebeck.itm.nettyrxtx.nodeapi.NodeAPIDecoder;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.embedder.DecoderEmbedder;
 import org.junit.Test;
-import packet.*;
+import de.uniluebeck.itm.nettyrxtx.nodeapi.packet.*;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

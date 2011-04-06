@@ -21,31 +21,32 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
  **********************************************************************************************************************/
 
-import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
-import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import packet.*;
+package de.uniluebeck.itm.nettyrxtx.nodeapi.packet;
 
-public class NodeAPIEncoder extends OneToOneEncoder {
+import org.jboss.netty.buffer.ChannelBuffer;
 
-	private static final Logger log = LoggerFactory.getLogger(NodeAPIEncoder.class);
+public class ResponsePacket extends NodeAPIPacket {
 
-	@Override
-	protected Object encode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
+	//Constructor
+	public ResponsePacket(ChannelBuffer buffer){
+		super(buffer);
+	}
 
-		if (!(msg instanceof NodeAPIPacket)) {
-			return msg;
-		}
+	//getters
 
-		NodeAPIPacket nodeAPIInputPacket = (NodeAPIPacket) msg;
+	public byte getCommandType(){
+		return super.getCommandType();
+	}
 
-		log.trace("[{}] Encoded NodeAPIPacket: {}", ctx.getName(), nodeAPIInputPacket);
-		//TODO: is NETWORK_IN correct?
-		return new ISensePacket(ISensePacketType.NETWORK_IN, nodeAPIInputPacket.getBuffer());
+	public byte getRequestId(){
+		return getBuffer().getByte(1);
+	}
+
+	public byte getResult(){
+		return getBuffer().getByte(2);
+	}
+
+	public ChannelBuffer getPayload(){
+		return getBuffer().slice(3, getBuffer().readableBytes() - 3);
 	}
 }

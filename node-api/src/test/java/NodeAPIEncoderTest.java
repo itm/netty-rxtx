@@ -22,18 +22,19 @@
  **********************************************************************************************************************/
 
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
+import de.uniluebeck.itm.nettyrxtx.nodeapi.NodeAPIEncoder;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.embedder.EncoderEmbedder;
 import org.junit.Test;
-import packet.CommandPacket;
-import packet.NodeAPIPacket;
-import packet.NodeOutputPacket;
+import de.uniluebeck.itm.nettyrxtx.nodeapi.packet.CommandPacket;
+import de.uniluebeck.itm.nettyrxtx.nodeapi.packet.NodeAPIPacket;
+import de.uniluebeck.itm.nettyrxtx.nodeapi.packet.NodeOutputPacket;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static packet.NodeAPIPacketType.DEBUG_MESSAGE;
-import static packet.NodeAPIPacketType.NODE_OUTPUT_TEXT;
+import static de.uniluebeck.itm.nettyrxtx.nodeapi.packet.NodeAPIPacketType.DEBUG_MESSAGE;
+import static de.uniluebeck.itm.nettyrxtx.nodeapi.packet.NodeAPIPacketType.NODE_OUTPUT_TEXT;
 
 public class NodeAPIEncoderTest {
 
