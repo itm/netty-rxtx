@@ -1,3 +1,26 @@
+/**********************************************************************************************************************
+ * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
+ * All rights reserved.                                                                                               *
+ *                                                                                                                    *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the   *
+ * following conditions are met:                                                                                      *
+ *                                                                                                                    *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following *
+ *   disclaimer.                                                                                                      *
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the        *
+ *   following disclaimer in the documentation and/or other materials provided with the distribution.                 *
+ * - Neither the name of the University of Luebeck nor the names of its contributors may be used to endorse or promote*
+ *   products derived from this software without specific prior written permission.                                   *
+ *                                                                                                                    *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, *
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE      *
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,         *
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE *
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    *
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY   *
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
+ **********************************************************************************************************************/
+
 package packet;
 
 import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
@@ -5,31 +28,14 @@ import de.uniluebeck.itm.nettyrxtx.isense.ISensePacketType;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import java.nio.channels.Channel;
-
-/**
- * Created by IntelliJ IDEA.
- * User: nrohwedder
- * Date: 03.03.11
- * Time: 15:58
- * To change this template use File | Settings | File Templates.
- */
 public class CommandPacket extends NodeAPIPacket {
 
-	//Constructor
-	/*public CommandPacket(ISensePacket iSensePacket){
-		super(iSensePacket);
-	}*/
-
 	public CommandPacket(byte command_type, byte request_id, ChannelBuffer payload){
-		//TODO check if constructor with ISensePacketType.NETWORK_IN is correct?
-		super(new ISensePacket(ISensePacketType.NETWORK_IN,
-				ChannelBuffers.wrappedBuffer(
+		super(ChannelBuffers.wrappedBuffer(
 					ChannelBuffers.wrappedBuffer(new byte[]{command_type}),
 					ChannelBuffers.wrappedBuffer(new byte[]{request_id}),
 					payload
-				)
-			));
+				));
 	}
 
 	public byte getCommandType(){
@@ -37,11 +43,11 @@ public class CommandPacket extends NodeAPIPacket {
 	}
 
 	public byte getRequestId(){
-		return buffer.getByte(1);
+		return getBuffer().getByte(1);
 	}
 
 	public ChannelBuffer getPayload(){
-		return buffer.slice(2, buffer.readableBytes() - 2);
+		return getBuffer().slice(2, getBuffer().readableBytes() - 2);
 	}
 
 
