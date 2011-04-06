@@ -21,39 +21,24 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
  **********************************************************************************************************************/
 
-package packet;
+package de.uniluebeck.itm.nettyrxtx.nodeapi.packet;
 
-import de.uniluebeck.itm.nettyrxtx.StringUtils;
-import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 
-public abstract class NodeAPIPacket {
+public class NodeOutputPacket extends NodeAPIPacket {
 
-	protected final ChannelBuffer buffer;
-
-	protected NodeAPIPacket(ChannelBuffer buffer) {
-		this.buffer = buffer;
+	public NodeOutputPacket(byte command_type, ChannelBuffer payload) {
+		super(ChannelBuffers.wrappedBuffer(
+				ChannelBuffers.wrappedBuffer(new byte[]{command_type}), payload));
 	}
 
-	//getters
-	public abstract ChannelBuffer getPayload();
-
-	public byte getCommandType(){
-		return getBuffer().getByte(0);
+	public byte getCommandType() {
+		return super.getCommandType();
 	}
 
-	public ChannelBuffer getBuffer(){
-		return buffer;
+	public ChannelBuffer getPayload() {
+		return getBuffer().slice(1, getBuffer().readableBytes() - 1);
 	}
-	//String toString()
-	public String toString(){
-		NodeAPIPacketType packetType = NodeAPIPacketType.fromValue(getCommandType());
-		StringBuilder builder = new StringBuilder();
-		builder.append(this.getClass().getSimpleName()).append("[type=");
-		builder.append(packetType == null ? getCommandType() : packetType);
-		builder.append(",payload=");
-		builder.append(StringUtils.toHexString(getPayload()));
-		builder.append("]");
-		return builder.toString();
-	}
+
 }

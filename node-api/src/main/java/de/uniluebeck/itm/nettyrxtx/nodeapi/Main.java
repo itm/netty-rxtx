@@ -1,4 +1,4 @@
-/**********************************************************************************************************************
+package de.uniluebeck.itm.nettyrxtx.nodeapi; /**********************************************************************************************************************
  * Copyright (c) 2011, Institute of Telematics, University of Luebeck                                                 *
  * All rights reserved.                                                                                               *
  *                                                                                                                    *
@@ -31,7 +31,7 @@ import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import packet.NodeAPIPacket;
+import de.uniluebeck.itm.nettyrxtx.nodeapi.packet.NodeAPIPacket;
 
 import java.io.BufferedReader;
 import java.io.IOException;

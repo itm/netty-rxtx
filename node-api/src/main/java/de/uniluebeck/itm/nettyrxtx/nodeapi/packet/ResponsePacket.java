@@ -21,37 +21,32 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
  **********************************************************************************************************************/
 
-import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
+package de.uniluebeck.itm.nettyrxtx.nodeapi.packet;
+
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import packet.NodeAPIPacket;
-import packet.ResponsePacket;
 
-/**
- * This decoder-class is for decoding ISensePackets or returning a ResponsePacket
- */
-public class NodeAPIDecoder extends OneToOneDecoder {
+public class ResponsePacket extends NodeAPIPacket {
 
-	private static final Logger log = LoggerFactory.getLogger(NodeAPIDecoder.class);
+	//Constructor
+	public ResponsePacket(ChannelBuffer buffer){
+		super(buffer);
+	}
 
-	@Override
-	protected Object decode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
-		ChannelBuffer payload;
+	//getters
 
-		if (msg instanceof ISensePacket) {
-			payload = ((ISensePacket) msg).getPayload();
-		} else if (msg instanceof ChannelBuffer) {
-			payload = (ChannelBuffer) msg;
-		} else {
-			return msg;
-		}
-		
-		NodeAPIPacket responsePacket = new ResponsePacket(payload);
-		log.trace("[{}] Decoded NodeAPIPacket: {}", ctx.getName(), payload);
-		return responsePacket;
+	public byte getCommandType(){
+		return super.getCommandType();
+	}
+
+	public byte getRequestId(){
+		return getBuffer().getByte(1);
+	}
+
+	public byte getResult(){
+		return getBuffer().getByte(2);
+	}
+
+	public ChannelBuffer getPayload(){
+		return getBuffer().slice(3, getBuffer().readableBytes() - 3);
 	}
 }

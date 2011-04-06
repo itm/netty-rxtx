@@ -21,19 +21,20 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
  **********************************************************************************************************************/
 
-package packet;
+package de.uniluebeck.itm.nettyrxtx.nodeapi.packet;
 
-import de.uniluebeck.itm.nettyrxtx.isense.ISensePacket;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 
-public class ResponsePacket extends NodeAPIPacket {
+public class CommandPacket extends NodeAPIPacket {
 
-	//Constructor
-	public ResponsePacket(ChannelBuffer buffer){
-		super(buffer);
+	public CommandPacket(byte command_type, byte request_id, ChannelBuffer payload){
+		super(ChannelBuffers.wrappedBuffer(
+					ChannelBuffers.wrappedBuffer(new byte[]{command_type}),
+					ChannelBuffers.wrappedBuffer(new byte[]{request_id}),
+					payload
+				));
 	}
-
-	//getters
 
 	public byte getCommandType(){
 		return super.getCommandType();
@@ -43,11 +44,9 @@ public class ResponsePacket extends NodeAPIPacket {
 		return getBuffer().getByte(1);
 	}
 
-	public byte getResult(){
-		return getBuffer().getByte(2);
+	public ChannelBuffer getPayload(){
+		return getBuffer().slice(2, getBuffer().readableBytes() - 2);
 	}
 
-	public ChannelBuffer getPayload(){
-		return getBuffer().slice(3, getBuffer().readableBytes() - 3);
-	}
+
 }
