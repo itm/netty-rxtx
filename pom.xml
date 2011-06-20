@@ -5,73 +5,52 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
-	<artifactId>netty-rxtx-parent</artifactId>
+	<artifactId>netty-rxtx</artifactId>
 	<name>Netty RXTX :: Parent</name>
-	<packaging>pom</packaging>
 	<version>0.2-SNAPSHOT</version>
 
-	<modules>
-		<module>netty-rxtx</module>
-		<module>dlestxetx</module>
-		<module>isense</module>
-		<module>rup</module>
-	</modules>
+	<dependencies>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
-				<artifactId>netty-rxtx</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
-				<artifactId>dlestxetx</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>de.uniluebeck.itm.netty-rxtx</groupId>
-				<artifactId>isense</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.netty</groupId>
-				<artifactId>netty</artifactId>
-				<version>3.2.3.Final</version>
-			</dependency>
-			<dependency>
-				<groupId>org.rxtx</groupId>
-				<artifactId>rxtx</artifactId>
-				<version>2.1.7</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>1.5.8</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.5.8</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>r07</version>
-			</dependency>
-			<dependency>
-				<groupId>de.uniluebeck.itm</groupId>
-				<artifactId>tr.util</artifactId>
-				<version>0.5.5</version>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.8.2</version>
-				<scope>test</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+		<dependency>
+			<groupId>de.uniluebeck.itm.itmutils</groupId>
+			<artifactId>itmutils</artifactId>
+			<version>0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.netty</groupId>
+			<artifactId>netty</artifactId>
+			<version>3.2.3.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.rxtx</groupId>
+			<artifactId>rxtx</artifactId>
+			<version>2.1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>r07</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.2</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 
 	<distributionManagement>
 		<repository>

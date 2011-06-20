@@ -21,30 +21,86 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                *
  **********************************************************************************************************************/
 
-package de.uniluebeck.itm.nettyrxtx.isense;
+package de.uniluebeck.itm.nettyrxtx.example;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
+
+import de.uniluebeck.itm.nettyrxtx.RXTXChannelFactory;
+import de.uniluebeck.itm.nettyrxtx.RXTXDeviceAddress;
+import org.jboss.netty.bootstrap.ClientBootstrap;
+import org.jboss.netty.channel.*;
+import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
+import org.jboss.netty.handler.codec.frame.Delimiters;
+import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.Executors;
 
-public class ISensePacketDecoder extends OneToOneDecoder {
+public class LineDelimitedDeviceOutputListener {
 
-	private static final Logger log = LoggerFactory.getLogger(ISensePacketDecoder.class);
+	public static void main(String[] args) {
 
-	@Override
-	protected Object decode(final ChannelHandlerContext ctx, final Channel channel, final Object msg) throws Exception {
+		String deviceAddress = args[0];
 
-		if (!(msg instanceof ChannelBuffer)) {
-			return msg;
+		ClientBootstrap bootstrap = new ClientBootstrap(new RXTXChannelFactory(Executors.newCachedThreadPool()));
+
+		// Configure the event pipeline factory.
+		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+			public ChannelPipeline getPipeline() throws Exception {
+				DefaultChannelPipeline pipeline = new DefaultChannelPipeline();
+				pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+				pipeline.addLast("decoder", new StringDecoder());
+				pipeline.addLast("encoder", new StringEncoder());
+				pipeline.addLast("loggingHandler", new SimpleChannelHandler() {
+					@Override
+					public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e)
+							throws Exception {
+
+						final String message = (String) e.getMessage();
+						synchronized (System.out) {
+							System.out.println("Message received: " + message);
+						}
+						if ("exit".equals(message)) {
+
+						}
+						super.messageReceived(ctx, e);
+					}
+				}
+				);
+				return pipeline;
+			}
+		}
+		);
+
+		// Make a new connection.
+		ChannelFuture connectFuture = bootstrap.connect(new RXTXDeviceAddress(deviceAddress));
+
+		// Wait until the connection is made successfully.
+		Channel channel = connectFuture.awaitUninterruptibly().getChannel();
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+		boolean exit = false;
+		while (!exit) {
+			try {
+				String line = reader.readLine();
+				if ("exit".equals(line)) {
+					exit = true;
+				}
+			} catch (IOException e) {
+				// ignore
+			}
 		}
 
-		ChannelBuffer buffer = (ChannelBuffer) msg;
-		ISensePacket iSensePacket = new ISensePacket(buffer);
-		log.trace("[{}] Decoded ISensePacket: {}", ctx.getName(), iSensePacket);
-		return iSensePacket;
+		// Close the connection.
+		channel.close().awaitUninterruptibly();
+
+		// Shut down all thread pools to exit.
+		bootstrap.releaseExternalResources();
 	}
+
 }
