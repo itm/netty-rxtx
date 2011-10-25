@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.TooManyListenersException;
 import java.util.concurrent.Executor;
 
@@ -75,8 +76,12 @@ public class RXTXChannelSink extends AbstractChannelSink {
 		private DefaultChannelFuture channelFuture;
 
 		private RXTXChannelSink channelSink;
+	    private Channel channel;
+        private SocketAddress remoteAddress;
 
-		private ConnectRunnable(final DefaultChannelFuture channelFuture, final RXTXChannelSink channelSink) {
+		private ConnectRunnable(final DefaultChannelFuture channelFuture, final RXTXChannelSink channelSink, Channel channel, SocketAddress remoteAddress) {
+            this.channel = channel;
+		    this.remoteAddress = remoteAddress;
 			this.channelFuture = channelFuture;
 			this.channelSink = channelSink;
 		}
@@ -90,6 +95,9 @@ public class RXTXChannelSink extends AbstractChannelSink {
 					connectInternal();
 					log.debug("Successfully connected.");
 					channelFuture.setSuccess();
+				    Channels.fireChannelConnected(channel, remoteAddress);
+				    log.debug("Fired Channel Connected.");
+
 				} catch (Exception e) {
 					log.warn("" + e, e);
 					channelFuture.setFailure(e);
@@ -317,7 +325,7 @@ public class RXTXChannelSink extends AbstractChannelSink {
 				case CONNECTED:
 					if (value != null) {
 						remoteAddress = (RXTXDeviceAddress) value;
-						executor.execute(new ConnectRunnable((DefaultChannelFuture) future, this));
+						executor.execute(new ConnectRunnable((DefaultChannelFuture) future, this, pipeline.getChannel(), remoteAddress));
 					} else {
 						executor.execute(new DisconnectRunnable((DefaultChannelFuture) future, this));
 					}
