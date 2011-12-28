@@ -121,7 +121,7 @@
 	</properties>
 
 	<scm>
-		<connection>scm:git:https://itm@github.com/itm/netty-rxtx.git</connection>
+		<connection>scm:git:git@github.com:itm/netty-rxtx.git</connection>
 	</scm>
 
 </project>
