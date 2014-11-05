@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>de.uniluebeck.itm.itmutils</groupId>
 			<artifactId>itmutils</artifactId>
-			<version>0.5</version>
+			<version>0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.netty</groupId>
